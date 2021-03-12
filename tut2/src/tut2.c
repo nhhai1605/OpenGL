@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <math.h>
 #if _WIN32
 #   include <Windows.h>
 #endif
@@ -13,7 +13,10 @@
 #   include <GL/glu.h>
 #   include <GL/glut.h>
 #endif
-
+const int initWidth = 600;
+const int initHeight = 600;
+float currentWidth = 600;
+float currentHeight = 600;
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -45,6 +48,23 @@ void display(void)
 	glVertex3f(-0.25, 0.75, -0.75);
 	glEnd();
 
+	float r = 0.5f;
+	glColor3f(1.0, 1.0, 1.0);
+	for(float x = -r; x <= r; x += 0.000001f)
+	{
+		glBegin(GL_LINES);
+		float y = 0;
+		if(x > -r && x < r)
+		{
+			y = (float)sqrt(r * r - x * x);
+		}
+		glVertex3f(0, 0, 0);
+		glVertex3f(x, y, 0);
+		glVertex3f(0, 0, 0);
+		glVertex3f(x, -y, 0);
+		glEnd();
+	}
+
 	/* Always check for errors! */
 	int err;
 	while ((err = glGetError()) != GL_NO_ERROR)
@@ -66,7 +86,28 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	}
 }
-
+void reshape(int width, int height)
+{
+	currentHeight = (float)height;
+	currentWidth = (float)width;
+	float newX, newY;
+	if (currentWidth > currentHeight)
+		{
+			newX = currentWidth / currentHeight;
+			newY = 1.0f;
+		}
+	else
+		{
+			newX = 1.0f;
+			newY = currentHeight / currentWidth;
+		}
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-newX, newX, -newY, newY, -1.0, 1.0);
+	glViewport(0, 0, currentWidth, currentHeight);
+	glMatrixMode(GL_MODELVIEW);
+	glutPostRedisplay();
+}
 void init()
 {
 	/* In this program these OpenGL calls only need to be done once,
@@ -86,6 +127,7 @@ int main(int argc, char** argv)
 	init();
 
 	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 

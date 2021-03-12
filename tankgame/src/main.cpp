@@ -1,9 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <math.h>
 #include <time.h> 
 #include <iostream>
+#include "Player.h"
 #if _WIN32
 #   include <Windows.h>
 #endif
@@ -21,37 +19,35 @@ const int initWidth = 600;
 const int initHeight = 600;
 float currentWidth = 600;
 float currentHeight = 600;
-
-float moveX = 0.0;
-float moveY = 0.0;
-float squareSize = 0.2f;
+Player * player;
 float bulletSize = 0.2 / 3;
 float bulletSpeed = 0.0;
 bool isShooting = false;
 bool isAlive = false;
 int enemyPosX = 0;
 int enemyPosY = 0;
-int squarePosX = 0;
-int squarePosY = 0;
+
 int bulletPosX = 0;
 int bulletPosY = 0;
 enum class GunDirection
 {
 	N, E, S, W, NONE
 };
+
 GunDirection gunDir = GunDirection::N;
 GunDirection lastGunDir = GunDirection::NONE;
+
 void drawGrid()
 {
-	glColor3f(0, 0, 0);
-	for (float x = -1.0; x <= 1.0; x += squareSize)
+	glColor3f(0.5, 0.5, 0.5);
+	for (float x = -1.0; x <= 1.0; x += SQUARE_SIZE)
 	{
 		glBegin(GL_LINES);
 		glVertex3f(x, -1.0, 0);
 		glVertex3f(x, 1.0, 0);
 		glEnd();
 	}
-	for (float y = -1.0; y <= 1.0; y += squareSize)
+	for (float y = -1.0; y <= 1.0; y += SQUARE_SIZE)
 	{
 		glBegin(GL_LINES);
 		glVertex3f(-1.0, y, 0);
@@ -64,9 +60,9 @@ void drawSquare(float x, float y)
 	glColor3f(0, 0, 0);
 	glBegin(GL_POLYGON);
 	glVertex3f(x, y, 0.0);
-	glVertex3f(x + squareSize, y, 0.0);
-	glVertex3f(x + squareSize, y - squareSize, 0.0);
-	glVertex3f(x, y - squareSize, 0.0);
+	glVertex3f(x + SQUARE_SIZE, y, 0.0);
+	glVertex3f(x + SQUARE_SIZE, y - SQUARE_SIZE, 0.0);
+	glVertex3f(x, y - SQUARE_SIZE, 0.0);
 	glEnd();
 }
 void drawEnemy(float x, float y)
@@ -74,9 +70,9 @@ void drawEnemy(float x, float y)
 	glColor3f(1.0, 0, 1.0);
 	glBegin(GL_POLYGON);
 	glVertex3f(x, y, 0.0);
-	glVertex3f(x + squareSize, y, 0.0);
-	glVertex3f(x + squareSize, y - squareSize, 0.0);
-	glVertex3f(x, y - squareSize, 0.0);
+	glVertex3f(x + SQUARE_SIZE, y, 0.0);
+	glVertex3f(x + SQUARE_SIZE, y - SQUARE_SIZE, 0.0);
+	glVertex3f(x, y - SQUARE_SIZE, 0.0);
 	glEnd();
 	isAlive = true;
 }
@@ -85,9 +81,9 @@ void killEnemy(float x, float y)
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POLYGON);
 	glVertex3f(x, y, 0.0);
-	glVertex3f(x + squareSize, y, 0.0);
-	glVertex3f(x + squareSize, y - squareSize, 0.0);
-	glVertex3f(x, y - squareSize, 0.0);
+	glVertex3f(x + SQUARE_SIZE, y, 0.0);
+	glVertex3f(x + SQUARE_SIZE, y - SQUARE_SIZE, 0.0);
+	glVertex3f(x, y - SQUARE_SIZE, 0.0);
 	glEnd();
 	isAlive = false;
 }
@@ -99,23 +95,23 @@ void shoot()
 	float bulletY = 0;
 	if (gunDir == GunDirection::N)
 	{
-		bulletX = bulletPosX * squareSize + bulletSize;
-		bulletY = bulletPosY * squareSize + bulletSpeed;
+		bulletX = bulletPosX * SQUARE_SIZE + bulletSize;
+		bulletY = bulletPosY * SQUARE_SIZE + bulletSpeed;
 	}
 	else if (gunDir == GunDirection::S)
 	{
-		bulletX = bulletPosX * squareSize + bulletSize;
-		bulletY = (bulletPosY - 1) * squareSize + bulletSize - bulletSpeed;
+		bulletX = bulletPosX * SQUARE_SIZE + bulletSize;
+		bulletY = (bulletPosY - 1) * SQUARE_SIZE + bulletSize - bulletSpeed;
 	}
 	else if (gunDir == GunDirection::E)
 	{
-		bulletX = (bulletPosX + 1) * squareSize - bulletSize + bulletSpeed;
-		bulletY = bulletPosY * squareSize - bulletSize;
+		bulletX = (bulletPosX + 1) * SQUARE_SIZE - bulletSize + bulletSpeed;
+		bulletY = bulletPosY * SQUARE_SIZE - bulletSize;
 	}
 	else if (gunDir == GunDirection::W)
 	{
-		bulletX = bulletPosX * squareSize - bulletSpeed;
-		bulletY = bulletPosY * squareSize - bulletSize;
+		bulletX = bulletPosX * SQUARE_SIZE - bulletSpeed;
+		bulletY = bulletPosY * SQUARE_SIZE - bulletSize;
 	}
 	glBegin(GL_POLYGON);
 	glVertex3f(bulletX, bulletY, 0.0);
@@ -134,10 +130,9 @@ bool isShot()
 	bool isShot = false;
 	if (isShooting == true)
 	{
-		std::cout << bulletPosY * squareSize + bulletSize << " " << enemyPosY * squareSize << std::endl;
 		if (gunDir == GunDirection::N)
 		{
-			if (bulletPosY * squareSize - bulletSize >= enemyPosY * squareSize)
+			if (bulletPosY * SQUARE_SIZE + bulletSpeed >= (enemyPosY - 1) * SQUARE_SIZE)
 			{
 				if (bulletPosX == enemyPosX)
 				{
@@ -149,7 +144,7 @@ bool isShot()
 		}
 		else if (gunDir == GunDirection::S)
 		{
-			if (bulletPosY * squareSize - bulletSize <= enemyPosY * squareSize)
+			if (bulletPosY * SQUARE_SIZE - bulletSpeed <= (enemyPosY + 1)* SQUARE_SIZE)
 			{
 				if (bulletPosX == enemyPosX)
 				{
@@ -161,11 +156,27 @@ bool isShot()
 		}
 		else if (gunDir == GunDirection::E)
 		{
-
+			if (bulletPosX * SQUARE_SIZE + bulletSpeed >= (enemyPosX - 1) * SQUARE_SIZE)
+			{
+				if (bulletPosY == enemyPosY)
+				{
+					isShot = true;
+					isShooting = false;
+					bulletSpeed = 0.0;
+				}
+			}			
 		}
 		else if (gunDir == GunDirection::W)
 		{
-
+			if (bulletPosX * SQUARE_SIZE - bulletSpeed <= (enemyPosX + 1) * SQUARE_SIZE)
+			{
+				if (bulletPosY == enemyPosY)
+				{
+					isShot = true;
+					isShooting = false;
+					bulletSpeed = 0.0;
+				}
+			}
 		}
 	}
 	return isShot;
@@ -175,15 +186,15 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glEnable(GL_DEPTH_TEST);
-
+	glLoadIdentity();
 	drawGrid();
-	drawSquare(squarePosX * squareSize, squarePosY * squareSize);
+	drawSquare(player->playerPosX * SQUARE_SIZE, player->playerPosY * SQUARE_SIZE);
 	if (isAlive == false)
 	{
 		enemyPosX = rand() % 10 - 5;
 		enemyPosY = rand() % 10 - 4;
 	}
-	drawEnemy(enemyPosX * squareSize, enemyPosY * squareSize);
+	drawEnemy(enemyPosX * SQUARE_SIZE, enemyPosY * SQUARE_SIZE);
 
 	if (isShooting == true)
 	{
@@ -191,7 +202,7 @@ void display(void)
 	}
 	if (isShot() == true)
 	{
-		killEnemy(enemyPosX * squareSize, enemyPosY * squareSize);
+		killEnemy(enemyPosX * SQUARE_SIZE, enemyPosY * SQUARE_SIZE);
 	}
 
 	/* Always check for errors! */
@@ -212,9 +223,8 @@ void keyboard(unsigned char key, int x, int y)
 		exit(EXIT_SUCCESS);
 		break;
 	case 'a':
-		if (squarePosX != -5)
+		if (player->playerPosX != -5)
 		{
-			squarePosX--;
 			if (isShooting == false)
 			{
 				gunDir = GunDirection::W;
@@ -224,12 +234,22 @@ void keyboard(unsigned char key, int x, int y)
 			{
 				lastGunDir = GunDirection::W;
 			}
+			if(player->playerPosX == enemyPosX + 1)
+			{
+				if(player->playerPosY != enemyPosY)
+				{
+					player->playerPosY--;
+				}
+			}
+			else 
+			{
+				player->playerPosX--;
+			}
 		}
 		break;
 	case 'd':
-		if (squarePosX != 4)
+		if (player->playerPosX != 4)
 		{
-			squarePosX++;
 			if (isShooting == false)
 			{
 				gunDir = GunDirection::E;
@@ -239,12 +259,22 @@ void keyboard(unsigned char key, int x, int y)
 			{
 				lastGunDir = GunDirection::E;
 			}
+			if(player->playerPosX == enemyPosX - 1)
+			{
+				if(player->playerPosY != enemyPosY)
+				{
+					player->playerPosX++;
+				}
+			}
+			else 
+			{
+				player->playerPosX++;
+			}
 		}
 		break;
 	case 'w':
-		if (squarePosY != 5)
+		if (player->playerPosY != 5)
 		{
-			squarePosY++;
 			if (isShooting == false)
 			{
 				gunDir = GunDirection::N;
@@ -254,12 +284,22 @@ void keyboard(unsigned char key, int x, int y)
 			{
 				lastGunDir = GunDirection::N;
 			}
+			if(player->playerPosY == enemyPosY - 1)
+			{
+				if(player->playerPosX != enemyPosX)
+				{
+					player->playerPosY++;
+				}
+			}
+			else 
+			{
+				player->playerPosY++;
+			}
 		}
 		break;
 	case 's':
-		if (squarePosY != -4)
+		if (player->playerPosY != -4)
 		{
-			squarePosY--;
 			if (isShooting == false)
 			{
 				gunDir = GunDirection::S;
@@ -269,6 +309,17 @@ void keyboard(unsigned char key, int x, int y)
 			{
 				lastGunDir = GunDirection::S;
 			}
+			if(player->playerPosY == enemyPosY + 1)
+			{
+				if(player->playerPosX != enemyPosX)
+				{
+					player->playerPosY--;
+				}
+			}
+			else 
+			{
+				player->playerPosY--;
+			}
 		}
 		break;
 	case 'f':
@@ -276,8 +327,8 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			isShooting = true;
 			bulletSpeed = 0.05f;
-			bulletPosX = squarePosX;
-			bulletPosY = squarePosY;
+			bulletPosX = player->playerPosX;
+			bulletPosY = player->playerPosY;
 		}
 		break;
 	default:
@@ -303,14 +354,17 @@ void reshape(int width, int height)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-newX, newX, -newY, newY, -1.0, 1.0);
-	glViewport(0, 0, currentWidth, currentHeight);
+	glViewport(0, 0, (GLsizei)currentWidth, (GLsizei)currentHeight);
 	glMatrixMode(GL_MODELVIEW);
 	glutPostRedisplay();
 }
 
 void idle()
 {
-	if (bulletSpeed != 0.0) bulletSpeed += 0.05f;
+	if (bulletSpeed != 0.0) 
+	{
+		bulletSpeed += 0.05f;
+	}
 	if (lastGunDir != GunDirection::NONE && isShooting == false)
 	{
 		gunDir = lastGunDir;
@@ -335,6 +389,7 @@ int main(int argc, char** argv)
 	glutCreateWindow("Tank Game");
 	glutReshapeWindow(initWidth, initHeight);
 	init();
+	player = new Player(0, 0);
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(reshape);
