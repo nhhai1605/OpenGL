@@ -175,25 +175,8 @@ void on_mouse_move(int mouseX, int mouseY)
 	currentWindowY = -mouseY + currentHeight / 2;
 }
 
-void CalculateFrameRate()
-{
-	static float framesPerSecond = 0.0f;
-	static int fps;
-	static float lastTime = 0.0f;
-	float currentTime = GetTickCount64() * 0.001f;
-	++framesPerSecond;
-	//std::cout << "FPS: " << fps << std::endl;
-	if (currentTime - lastTime > 1.0f)
-	{
-		lastTime = currentTime;
-		fps = (int)framesPerSecond;
-		framesPerSecond = 0;
-	}
-}
-
 void idle()
 {
-	CalculateFrameRate();
 	float t = glutGet(GLUT_ELAPSED_TIME);
 	dt = t - last_t;
 	if (keyArray[int('a')] == PRESSED)
