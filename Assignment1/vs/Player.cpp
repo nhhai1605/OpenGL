@@ -1,11 +1,8 @@
 #include "Player.h"
-
 Player::Player(float posX, float posY)
 {
 	this->posX = posX;
 	this->posY = posY;
-	this->playerSize = INIT_PLAYER_SIZE;
-	this->playerDirectionRadian = 0.0f;
 }
 
 Player::~Player()
@@ -20,7 +17,7 @@ void Player::setPlayerPos(float x, float y)
 	this->playerSize = INIT_PLAYER_SIZE;
 }
 
-void Player::move(float dt)
+void Player::move()
 {
 	posX += velocityX;
 	posY += velocityY;

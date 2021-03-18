@@ -1,7 +1,7 @@
-#include <math.h>
-#include <iostream>
 #include "Player.h"
 #include "Bullet.h"
+#include "Utility.h"
+#include "Asteroid.h"
 #if _WIN32
 #   include <Windows.h>
 #else
@@ -18,27 +18,29 @@
 #   include <GL/glut.h>
 #endif
 
-#define FPS 60
+//change this to change to the window(resizable) or fullscreen mode
+#define FULLSCREEN_MODE true
 
+//true for polygon ship and false for line ship(like image in the assignment pdf)
+#define SHIP_POLYGON true
+
+#define SHOW_HITBOX true
 const int initWidth = 600, initHeight = 600;
 float currentWidth = 0.0f, currentHeight = 0.0f, lastWidth = 0.0f, lastHeight = 0.0f;
-float currentWindowX = 0.0f, currentWindowY = 0.0f;
+float bulletSpeed = INIT_BULLET_SPEED;
+float bulletSize = INIT_BULLET_SIZE;
+float currentFPS = 0.0f, lastFPS = 0.0f;
 Player * player;
-Bullet * bullet;
-int bulletSize = 10;
-static float last_t = 0, dt = 0;
-enum KeyState {FREE, PRESSED} keyArray[127];
+std::vector <Bullet*> bullets;
+std::vector <Asteroid*> asteroids;
+static float last_t = 0.0f, dt = 0.0f;
+float shoot_delay = 0.0f, fps_update_delay = 0.0f, asteroid_spawn_delay = 0.0f;
+bool shootable = true;
+bool isThrusting = false;
+bool FPSupdatable = true;
+enum class KeyState {FREE, PRESSED} keyArray[127], mousePressed;
 
-void drawPoint(float currentWindowX, float currentWindowY)
-{
-	glColor3f(0.0, 0.0, 0.0);
-	glPointSize(10.0f);
-	glBegin(GL_POINTS);
-	glVertex3f(currentWindowX, currentWindowY, 0.0);
-	glEnd();
-}
-
-void drawPlayer(float currentWindowX, float currentWindowY)
+void drawPlayer(Player * player)
 {
 	float x = player->posX, y = player->posY;
 	float size = player->playerSize;
@@ -52,44 +54,170 @@ void drawPlayer(float currentWindowX, float currentWindowY)
 	//we just need to add playerX and playerY after calculate
 	x1 = size * cos(radian) + size * sin(radian);
 	y1 = size * sin(radian) - size * cos(radian);
-	x2 = -size * 2 * sin(radian);
-	y2 = size * 2 * cos(radian);
+	x2 = -size * 1.5 * sin(radian);
+	y2 = size * 1.5 * cos(radian);
 	x3 = -size * cos(radian) + size * sin(radian);
 	y3 = -size * sin(radian) - size * cos(radian);
-	glColor3f(0.0, 0.0, 0.0);
-	glPointSize(5.0f);
-	glBegin(GL_POLYGON);
-	glVertex3f(x, y, 0.0);
-	glVertex3f(x1 + x, y1 + y, 0.0);
-	glVertex3f(x2 + x, y2 + y, 0.0);
-	glVertex3f(x3 + x, y3 + y, 0.0);
-	glEnd();
+	
+	//Draw the ship	
+	glColor3f(1.0, 1.0, 1.0);
+	if (SHIP_POLYGON == true)
+	{
+		glBegin(GL_POLYGON);
+		glVertex3f(x, y, 0.0);
+		glVertex3f(x1 + x, y1 + y, 0.0);
+		glVertex3f(x2 + x, y2 + y, 0.0);
+		glVertex3f(x3 + x, y3 + y, 0.0);
+		glEnd();
+	}
+	else
+	{
+		glLineWidth(player->playerSize / 6);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(x, y, 0.0);
+		glVertex3f(x1 + x, y1 + y, 0.0);
+		glVertex3f(x2 + x, y2 + y, 0.0);
+		glVertex3f(x3 + x, y3 + y, 0.0);
+		glVertex3f(x, y, 0.0);
+		glVertex3f(x2 + x, y2 + y, 0.0);
+		glEnd();
+	}
+
+	if (SHOW_HITBOX == true)
+	{
+		float r = player->playerSize;
+		glColor3f(1.0, 0.0, 0.0);
+		glPointSize(2.0f);
+		glBegin(GL_POINTS);
+		for (float i = -r; i <= r; i += 0.01)
+		{
+			float circleX = i;
+			float circleY = sqrt(r * r - circleX * circleX);
+			glVertex3f(circleX + player->posX, player->posY + circleY, 1.0);
+			glVertex3f(circleX + player->posX, player->posY - circleY, 1.0);
+		}
+		glEnd();
+	}
+
+	if (isThrusting == true)
+	{
+		//the cordinates of the rocket boost
+		float rx1, ry1, rx2, ry2, rx3, ry3, rx4, ry4, rx5, ry5, rx6, ry6;
+		rx1 = size / 2.5 * cos(radian) + size / 2.5 * sin(radian);
+		ry1 = size / 2.5 * sin(radian) - size / 2.5 * cos(radian);
+		rx2 = size * sin(radian);
+		ry2 = -size * cos(radian);
+		rx3 = -size / 2.5 * cos(radian) + size / 2.5 * sin(radian);
+		ry3 = -size / 2.5 * sin(radian) - size / 2.5 * cos(radian);
+
+		rx4 = size / 4 * cos(radian) + size / 4 * sin(radian);
+		ry4 = size / 4 * sin(radian) - size / 4 * cos(radian);
+		rx5 = size * 0.75 * sin(radian);
+		ry5 = -size * 0.75 * cos(radian);
+		rx6 = -size / 4 * cos(radian) + size / 4 * sin(radian);
+		ry6 = -size / 4 * sin(radian) - size / 4 * cos(radian);
+
+		//Draw the rocket boost
+		glColor3f(1.0, 0.5, 0.05);
+		glBegin(GL_POLYGON);
+		glVertex3f(x, y, 0.0);
+		glVertex3f(rx1 + x, ry1 + y, 0.5);
+		glVertex3f(rx2 + x, ry2 + y, 0.0);
+		glVertex3f(rx3 + x, ry3 + y, 0.0);
+		glEnd();
+
+		glColor3f(1.0, 0.0, 0.0);
+		glBegin(GL_POLYGON);
+		glVertex3f(x, y, 0.0);
+		glVertex3f(rx4 + x, ry4 + y, 0.5);
+		glVertex3f(rx5 + x, ry5 + y, 0.5);
+		glVertex3f(rx6 + x, ry6 + y, 0.5);
+		glEnd();
+	}
 }
 
 void drawBullet(Bullet * bullet)
 {
-	glPointSize((float)bulletSize);
+	glPointSize(bulletSize);
 	glColor3f(1.0, 0.0, 0.0);
-	glPushMatrix();
-	glRotatef(bullet->bulletDirectionRadian, 0, 0, 1.0);
 	glBegin(GL_POINTS);
-	glVertex3f(bullet->bulletX, bullet->bulletY, 0.0);
+	glVertex3f(bullet->posX, bullet->posY, 0.0);
 	glEnd();
+}
+
+void drawAsteroid(Asteroid* asteroid)
+{
+	glColor3f(0.5, 0.5, 0.5);
+	float angle = 360 / asteroid->vertices;
+	glBegin(GL_POLYGON);
+	float radian = angle * PI / 180;
+	for (int i = 0; i < asteroid->vertices; i++)
+	{
+		float x = ASTEROID_RADIUS * cos(radian * i) + ASTEROID_RADIUS * sin(radian * i);
+		float y = ASTEROID_RADIUS * sin(radian * i) - ASTEROID_RADIUS * cos(radian * i);
+		x *= asteroid->offsets[i] / 10;
+		y *= asteroid->offsets[i] / 10;
+		glVertex3f(x + asteroid->posX, y + asteroid->posY, 0.0);
+	}
+	glEnd();
+	if (SHOW_HITBOX == true)
+	{
+		float r = ASTEROID_RADIUS;
+		glColor3f(1.0, 0.0, 0.0);
+		glPointSize(2.0f);
+		glBegin(GL_POINTS);
+		for (float i = -r; i <= r; i += 0.01)
+		{
+			float circleX = i;
+			float circleY = sqrt(r * r - circleX * circleX);
+			glVertex3f(circleX + asteroid->posX, asteroid->posY + circleY, 1.0);
+			glVertex3f(circleX + asteroid->posX, asteroid->posY - circleY, 1.0);
+		}
+		glEnd();
+	}
+}
+
+void drawFPS(std::string fps)
+{
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0, currentWidth, 0 , currentHeight, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glColor3f(1.0, 1.0, 1.0);
+	glRasterPos2f(0, 0);
+	fps = "FPS: " + fps;
+	for (std::string::iterator i = fps.begin(); i != fps.end(); ++i)
+	{
+		char c = *i;
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 }
 
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
-	drawBullet(bullet);
-	drawPlayer(currentWindowX, currentWindowY);
-	drawPoint(currentWindowX, currentWindowY);
-	glColor3f(0.0, 0.0, 0.0);
-	glPointSize(10.0f);
-	glBegin(GL_POINTS);
-	glEnd();
+
+	drawFPS(std::to_string(static_cast<int>(lastFPS)));
+
+	drawPlayer(player);
+	for (auto& bullet : bullets)
+	{
+		drawBullet(bullet);
+	}
+	for (auto& asteroid : asteroids)
+	{
+		drawAsteroid(asteroid);
+	}
 
 	int err;
 	while ((err = glGetError()) != GL_NO_ERROR)
@@ -102,18 +230,20 @@ void display(void)
 void on_key_press(unsigned char key, int x, int y)
 {
 	if (key == 27)
+	{
 		exit(EXIT_SUCCESS);
+	}
 	if (key == 'w')
 	{
-		keyArray[int('w')] = PRESSED;
+		keyArray[int('w')] = KeyState::PRESSED;
 	}
 	if (key == 'a')
 	{
-		keyArray[int('a')] = PRESSED;
+		keyArray[int('a')] = KeyState::PRESSED;
 	}
 	if (key == 'd')
 	{
-		keyArray[int('d')] = PRESSED;
+		keyArray[int('d')] = KeyState::PRESSED;
 	}
 	glutPostRedisplay();
 }
@@ -122,15 +252,15 @@ void on_key_release(unsigned char key, int x, int y)
 {
 	if (key == 'w')
 	{
-		keyArray[int('w')] = FREE;
+		keyArray[int('w')] = KeyState::FREE;
 	}
 	if (key == 'a')
 	{
-		keyArray[int('a')] = FREE;
+		keyArray[int('a')] = KeyState::FREE;
 	}
 	if (key == 'd')
 	{
-		keyArray[int('d')] = FREE;
+		keyArray[int('d')] = KeyState::FREE;
 	}
 }
 
@@ -146,11 +276,18 @@ void reshape(int width, int height)
 	{
 		lastHeight = currentWidth;
 	}
-	player->playerSize = INIT_PLAYER_SIZE * (currentHeight + currentWidth) / (initHeight + initWidth);
 
+	player->playerSize = INIT_PLAYER_SIZE * (currentHeight + currentWidth) / (initHeight + initWidth);
+	player->thrustSpeed = player->playerSize / 2;
+	bulletSize = INIT_BULLET_SIZE * (currentHeight + currentWidth) / (initHeight + initWidth);
+	bulletSpeed = bulletSize / INIT_BULLET_SIZE * INIT_BULLET_SPEED;
 	player->posX = player->posX / lastWidth * currentWidth ;
 	player->posY = player->posY / lastHeight * currentHeight;
-
+	for (auto& bullet : bullets)
+	{
+		bullet->posX = bullet->posX / lastWidth * currentWidth;
+		bullet->posY = bullet->posY / lastHeight * currentHeight;
+	}
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-currentWidth / 2, currentWidth / 2, -currentHeight / 2, currentHeight / 2, -1.0, 1.0);
@@ -161,50 +298,140 @@ void reshape(int width, int height)
 	glutPostRedisplay();
 }
 
-void init(int initScreenWidth, int initScreenHeight)
-{
-	glMatrixMode(GL_PROJECTION);
-	glOrtho(-initScreenWidth /2, initScreenWidth /2, -initScreenHeight /2, initScreenHeight /2, -1.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glutSetCursor(GLUT_CURSOR_FULL_CROSSHAIR);
+void on_mouse_button(int btn, int state, int x, int y) 
+{ 
+
+	if (btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		mousePressed = KeyState::PRESSED;
+	}
+	else 
+	{
+		mousePressed = KeyState::FREE;
+	}
 }
 
-void on_mouse_move(int mouseX, int mouseY)
+void update_game_state(float dt)
 {
-	currentWindowX = mouseX - currentWidth / 2;
-	currentWindowY = -mouseY + currentHeight / 2;
-}
+	//Asteroid spaw delay time
+	asteroid_spawn_delay += dt;
+	if (asteroid_spawn_delay >= 2000.0 && asteroids.size() < INIT_ASTEROIDS_MAX)
+	{
+		int int_currentWidth = static_cast<int>(currentWidth);
+		int int_currentHeight = static_cast<int>(currentHeight);
+		float asteroidX = rand() % 100 + (int_currentWidth / 2); //100 just to make sure the asteroid is spawning outside the wall 
+		float asteroidY = rand() % 100 + (int_currentHeight / 2);
+		//float asteroidX = rand() % int_currentWidth - int_currentWidth / 2;
+		//float asteroidY = rand() % int_currentHeight - int_currentHeight / 2;
+		Asteroid* asteroid = new Asteroid(asteroidX, asteroidY);
+		asteroids.push_back(asteroid);
+		asteroid_spawn_delay = 0.0;
+	}
 
-void idle()
-{
-	float t = glutGet(GLUT_ELAPSED_TIME);
-	dt = t - last_t;
-	if (keyArray[int('a')] == PRESSED)
+
+	//Shoot delay time
+	shoot_delay += dt;
+	if (shoot_delay >= TIME_DELAY_BETWEEN_TWO_SHOTS)
+	{
+		shoot_delay = 0.0f;
+		shootable = true;
+	}
+
+	//Shooting
+	if (mousePressed == KeyState::PRESSED && shootable == true)
+	{
+		shootable = false;
+		shoot_delay = 0.0f;
+		float size = player->playerSize;
+		float radian = player->playerDirectionRadian;
+		float posX = player->posX;
+		float posY = player->posY;
+		posX += -size * 2 * sin(radian);
+		posY += size * 2 * cos(radian);
+		Bullet* bullet = new Bullet(posX, posY, radian);
+		bullets.push_back(bullet);
+	}
+
+	//FPS update delay time
+	currentFPS = 1000 / dt;
+	fps_update_delay += dt;
+	if (fps_update_delay >= FPS_UPDATE_DELAY) //2 seconds
+	{
+		fps_update_delay = 0.0f;
+		lastFPS = currentFPS;
+	}
+	//delete bullet that are out of the wall
+	for (int i = 0; i < bullets.size(); i++)
+	{
+		auto& bullet = bullets[i];
+		if (bullet->posX > currentWidth / 2 + BULLET_MAX_DIS_BEHIND_WALL || bullet->posX < -currentWidth / 2 - BULLET_MAX_DIS_BEHIND_WALL
+			|| bullet->posY > currentHeight / 2 + BULLET_MAX_DIS_BEHIND_WALL || bullet->posY < -currentHeight / 2 - BULLET_MAX_DIS_BEHIND_WALL)
+		{
+			bullets.erase(bullets.begin() + i);
+			break;
+		}
+	}
+	for (auto& bullet : bullets)
+	{
+		bullet->posX -= sin(bullet->bulletDirectionRadian) * bulletSpeed / currentFPS;
+		bullet->posY += cos(bullet->bulletDirectionRadian) * bulletSpeed / currentFPS;
+	}
+	for (auto& asteroid : asteroids)
+	{
+		if (asteroid->posX > currentWidth / 2 + ASTEROID_RADIUS)
+		{
+			asteroid->posX = -currentWidth / 2 - ASTEROID_RADIUS;
+		}
+		else if (asteroid->posX < -currentWidth / 2 - ASTEROID_RADIUS)
+		{
+			asteroid->posX = currentWidth / 2 + ASTEROID_RADIUS;
+		}
+		if (asteroid->posY > currentHeight / 2 + ASTEROID_RADIUS)
+		{
+			asteroid->posY = -currentHeight / 2 - ASTEROID_RADIUS;
+		}
+		else if (asteroid->posY < -currentHeight / 2 - ASTEROID_RADIUS)
+		{
+			asteroid->posY = currentHeight / 2 + ASTEROID_RADIUS;
+		}
+	}
+	for (auto& asteroid : asteroids)
+	{
+		asteroid->posX -= sin(asteroid->asteroidDirectionRadian) * asteroid->asteroidSpeed / currentFPS;
+		asteroid->posY += cos(asteroid->asteroidDirectionRadian) * asteroid->asteroidSpeed / currentFPS;
+	}
+
+
+	//Ship movement
+	if (keyArray[int('a')] == KeyState::PRESSED)
 	{
 		player->rotateLeft(dt);
 	}
-	if (keyArray[int('d')] == PRESSED)
+	if (keyArray[int('d')] == KeyState::PRESSED)
 	{
 		player->rotateRight(dt);
 	}
-	if (keyArray[int('w')] == PRESSED)
+	if (keyArray[int('w')] == KeyState::PRESSED)
 	{
 		if (player->velocityX <= MAX_SPEED)
 		{
-			player->velocityX -= THRUST_SPEED * sin(player->playerDirectionRadian) / FPS;
+			player->velocityX -= player->thrustSpeed * sin(player->playerDirectionRadian) / currentFPS;
 		}
 		if (player->velocityY <= MAX_SPEED)
 		{
-			player->velocityY += THRUST_SPEED * cos(player->playerDirectionRadian) / FPS;
+			player->velocityY += player->thrustSpeed * cos(player->playerDirectionRadian) / currentFPS;
 		}
+		isThrusting = true;
 	}
 	else
 	{
-		player->velocityX -= FRICTION * player->velocityX / FPS;
-		player->velocityY -= FRICTION * player->velocityY / FPS;
+		isThrusting = false;
+		player->velocityX -= FRICTION * player->velocityX / currentFPS;
+		player->velocityY -= FRICTION * player->velocityY / currentFPS;
 	}
-	player->move(dt);
+	player->move();
 
+	//ship go through wall situation
 	if (player->posX < (-currentWidth / 2 - player->playerSize) && player->velocityX < 0)
 	{
 		player->posX = currentWidth / 2 + player->playerSize * 2;
@@ -216,14 +443,29 @@ void idle()
 
 	if (player->posY < (-currentHeight / 2 - player->playerSize) && player->velocityY < 0)
 	{
-		player->posY = currentHeight / 2 + player->playerSize * 2 ;
+		player->posY = currentHeight / 2 + player->playerSize * 2;
 	}
 	else if (player->posY > (currentHeight / 2 + player->playerSize) && player->velocityY > 0)
 	{
 		player->posY = -currentHeight / 2 - player->playerSize * 2;
 	}
+}
+
+void idle()
+{
+	float t = glutGet(GLUT_ELAPSED_TIME);
+	dt = t - last_t;
+	update_game_state(dt);
 	last_t = t;
 	glutPostRedisplay();
+}
+
+void init(int initScreenWidth, int initScreenHeight)
+{
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(-initScreenWidth / 2, initScreenWidth / 2, -initScreenHeight / 2, initScreenHeight / 2, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glutSetCursor(GLUT_CURSOR_FULL_CROSSHAIR);
 }
 
 int main(int argc, char** argv)
@@ -231,22 +473,34 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	const int screenWidth = glutGet(GLUT_SCREEN_WIDTH);
 	const int screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowPosition((screenWidth - initWidth) / 2, (screenHeight - initHeight) / 2);
-	glutInitWindowSize(initWidth, initHeight);
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);	
+
+	if (FULLSCREEN_MODE == false)
+	{
+		glutInitWindowPosition((screenWidth - initWidth) / 2, (screenHeight - initHeight) / 2);
+		glutInitWindowSize(initWidth, initHeight);
+	}
 	glutCreateWindow("Assignment 1");
 	init(initWidth, initHeight);
-
+	if (FULLSCREEN_MODE == true)
+	{
+		glutFullScreen();
+	}
+	srand(time(NULL));
 	player = new Player(0, 0);
-	bullet = new Bullet(0, 0, player->playerDirectionRadian);
-	//	glutFullScreen();
 
-	glutPassiveMotionFunc(on_mouse_move);
-	glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
+
+	//mouse function
+	glutMouseFunc(on_mouse_button);
+
+	//key function 
 	glutKeyboardFunc(on_key_press);
 	glutKeyboardUpFunc(on_key_release);
+
+	glutIdleFunc(idle);
 	glutDisplayFunc(display);
+
 	glutMainLoop();
 
 	return EXIT_SUCCESS;

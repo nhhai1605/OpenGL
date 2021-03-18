@@ -15,12 +15,21 @@
     <ClCompile Include="Bullet.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="Asteroid.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Asteroid.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

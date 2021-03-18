@@ -1,17 +1,14 @@
 #ifndef BULLET
 #define BULLET
-#include <math.h>
-#include <iostream>
+#include "Utility.h"
 class Bullet
 {
 public:
-	Bullet(float bulletX, float bulletY, float bulletDirectionRadian);
+	Bullet(float posX, float posY, float bulletDirectionRadian);
 	~Bullet();
-	float bulletX, bulletY, bulletDirectionRadian, bulletSpeed = 10.0f;
+	float posX, posY, bulletDirectionRadian;
 	void setBulletPos(float x, float y);
-	//void setBulletDirection(float x, float y);
-	//void setBulletDirection(float angle);
-	void move();
+
 private:
 };
 

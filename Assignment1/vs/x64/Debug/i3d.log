@@ -1,6 +1,21 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(519,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (i3d.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   main.cpp
-C:\Users\nguyenhh\Desktop\3DANI\assignment1\vs\main.cpp(157,33): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\nguyenhh\Desktop\3DANI\assignment1\vs\main.cpp(157,19): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\nguyenhh\Desktop\3DANI\assignment1\vs\main.cpp(197,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-  i3d.vcxproj -> C:\Users\nguyenhh\Desktop\3DANI\assignment1\Assignment164dbg.exe
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(57,19): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(58,18): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(92,39): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(106,34): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(107,34): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(110,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(111,35): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(115,21): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(116,22): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(121,27): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(151,14): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(169,39): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(294,33): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(294,19): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(322,19): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(323,19): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(456,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(489,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  i3d.vcxproj -> C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\Assignment164dbg.exe

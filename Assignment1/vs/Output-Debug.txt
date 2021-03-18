@@ -1,0 +1,79 @@
+﻿'Assignment164dbg.exe' (Win32): Loaded 'C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\Assignment164dbg.exe'. Symbols loaded.
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ntdll.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\kernel32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\KernelBase.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\opengl32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msvcrt.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\advapi32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\sechost.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\rpcrt4.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\user32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\win32u.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\gdi32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\gdi32full.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msvcp_win.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ucrtbase.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\combase.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\bcryptprimitives.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\glu32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msvcp140d.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\freeglut.dll'. Module was built without symbols.
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\vcruntime140d.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\vcruntime140_1d.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ucrtbased.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winmm.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winmmbase.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cfgmgr32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\DXCore.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\imm32.dll'. 
+The thread 0x3304 has exited with code 0 (0x0).
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\uxtheme.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msctf.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\oleaut32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_a51067c0ac557884\nvoglv64.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\shell32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\SHCore.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\windows.storage.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\profapi.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\powrprof.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\umpdc.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\shlwapi.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\kernel.appcore.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cryptsp.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\setupapi.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\bcrypt.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ole32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wtsapi32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\version.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msasn1.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cryptnet.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\crypt32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cryptbase.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\devobj.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wintrust.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ntmarta.dll'. 
+The thread 0x27b0 has exited with code 0 (0x0).
+The thread 0x5328 has exited with code 0 (0x0).
+The thread 0x4e08 has exited with code 0 (0x0).
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\nvspcap64.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\dwmapi.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\TextInputFramework.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\CoreMessaging.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\CoreUIComponents.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\WinTypes.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\WinTypes.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\WinTypes.dll'. 
+'Assignment164dbg.exe' (Win32): Unloaded 'C:\Windows\System32\WinTypes.dll'
+'Assignment164dbg.exe' (Win32): Unloaded 'C:\Windows\System32\WinTypes.dll'
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\iertutil.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winsta.dll'. 
+The thread 0x41e8 has exited with code 0 (0x0).
+The thread 0x5470 has exited with code 0 (0x0).
+The thread 0x2c5c has exited with code 0 (0x0).
+The thread 0x2f50 has exited with code 0 (0x0).
+The thread 0x450 has exited with code 0 (0x0).
+The thread 0x1114 has exited with code 0 (0x0).
+The thread 0x2320 has exited with code 0 (0x0).
+The thread 0x4da4 has exited with code 0 (0x0).
+The thread 0x1bec has exited with code 0 (0x0).
+The program '[10676] Assignment164dbg.exe' has exited with code 0 (0x0).
