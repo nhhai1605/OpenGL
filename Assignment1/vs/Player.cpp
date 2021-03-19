@@ -14,7 +14,13 @@ void Player::setPlayerPos(float x, float y)
 {
 	this->posX = x;
 	this->posY = y;
-	this->playerSize = INIT_PLAYER_SIZE;
+}
+
+void Player::die()
+{
+	posX = 0.0;
+	posY= 0.0;
+	live--;
 }
 
 void Player::move()
@@ -33,11 +39,6 @@ void Player::setPlayerDirection(float x, float y)
 		this->playerDirectionRadian = radian;
 	else
 		this->playerDirectionRadian = PI - radian;
-}
-
-void Player::shoot()
-{
-
 }
 
 void Player::rotateLeft(float dt)
