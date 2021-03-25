@@ -29,18 +29,6 @@ void Player::move()
 	posY += velocityY;
 }
 
-void Player::setPlayerDirection(float x, float y)
-{
-	float currentX = x - posX;
-	float currentY = y - posY;
-	float hypotenuse = sqrt(currentX * currentX + currentY * currentY);
-	float radian = -(float)asin(currentX / hypotenuse);
-	if(y >= posY)
-		this->playerDirectionRadian = radian;
-	else
-		this->playerDirectionRadian = PI - radian;
-}
-
 void Player::rotateLeft(float dt)
 {
 	float angle = (double)playerDirectionRadian * 180 / PI;

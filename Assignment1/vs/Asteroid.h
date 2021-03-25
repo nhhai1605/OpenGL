@@ -7,6 +7,7 @@ public:
 	Asteroid(float posX, float posY);
 	~Asteroid();
 	float posX, posY, asteroidDirectionRadian, asteroidSpeed;
+	float rotateRate;
 	std::vector <float> offsets;
 	int vertices;
 	void setAsteroidPos(float x, float y);

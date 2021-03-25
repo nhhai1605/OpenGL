@@ -18,9 +18,6 @@
 #   include <GL/glut.h>
 #endif
 
-//change this to change to the window(resizable) or fullscreen mode
-#define FULLSCREEN_MODE true
-
 //true for polygon ship and false for line ship(like image in the assignment pdf)
 #define SHIP_POLYGON true
 
@@ -30,9 +27,8 @@
 //false to activate the "touch wall then die" mode
 #define GO_THROUGH_WALL false
 
-
-const int initWidth = 600, initHeight = 600;
-float currentWidth = 0.0f, currentHeight = 0.0f, lastWidth = 0.0f, lastHeight = 0.0f;
+int screenWidth, screenHeight;
+int arenaWidth, arenaHeight;
 float bulletSpeed = INIT_BULLET_SPEED;
 float bulletSize = INIT_BULLET_SIZE;
 float currentFPS = 0.0f, lastFPS = 0.0f;
@@ -45,32 +41,78 @@ bool shootable = true;
 bool isThrusting = false;
 bool FPSupdatable = true;
 enum class KeyState {FREE, PRESSED} keyArray[127], mousePressed;
-
+enum class WallWarning {N, E, S, W, NONE};
+WallWarning warning = WallWarning::N;
 float distance(float x1, float y1, float x2, float y2)
 {
-	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2)*(y1 - y2));
+	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
 
+void drawArena(int arenaWidth, int arenaHeight)
+{
+	glLineWidth(20.0f); 
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_LINES);
+	if (warning == WallWarning::W)
+	{
+		glColor3f(1.0, 0.0, 0.0);
+	}
+	glVertex3f(-arenaWidth / 2, -arenaHeight / 2, 0.0);
+	glVertex3f(-arenaWidth / 2, arenaHeight / 2, 0.0);
+	glColor3f(1.0, 1.0, 1.0);
+	if (warning == WallWarning::N)
+	{
+		glColor3f(1.0, 0.0, 0.0);
+	}
+	glVertex3f(-arenaWidth / 2, arenaHeight / 2, 0.0);
+	glVertex3f(arenaWidth / 2, arenaHeight / 2, 0.0);
+	glColor3f(1.0, 1.0, 1.0);
+	if (warning == WallWarning::E)
+	{
+		glColor3f(1.0, 0.0, 0.0);
+	}
+	glVertex3f(arenaWidth / 2, arenaHeight / 2, 0.0);
+	glVertex3f(arenaWidth / 2, -arenaHeight / 2, 0.0);
+	glColor3f(1.0, 1.0, 1.0);
+	if (warning == WallWarning::S)
+	{
+		glColor3f(1.0, 0.0, 0.0);
+	}
+	glVertex3f(arenaWidth / 2, -arenaHeight / 2, 0.0);
+	glVertex3f(-arenaWidth / 2, -arenaHeight / 2, 0.0);
+	glColor3f(1.0, 1.0, 1.0);
+	glEnd();
+}
 void drawPlayerInfo(Player * player)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, currentWidth, 0 , currentHeight, -1.0, 1.0);
+	glOrtho(0, screenWidth, 0 , screenHeight, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 	glColor3f(1.0, 1.0, 1.0);
-	glRasterPos2f(50, currentHeight - 50);
+
 	std::string live = "Live: " + std::to_string(player->live);
+	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth / 2, (screenHeight - arenaHeight) / 2 + arenaHeight - 50);
 	for (std::string::iterator i = live.begin(); i != live.end(); ++i)
 	{
 		char c = *i;
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
 	}
-	glRasterPos2f(50, currentHeight - 100);
-	std::string score = "Score: " + std::to_string(player->score);
+
+	std::string score = "Score: " + std::to_string(player->score);\
+	glRasterPos2f((screenWidth - arenaWidth)/2 + 50, (screenHeight - arenaHeight) / 2 + arenaHeight - 50);
 	for (std::string::iterator i = score.begin(); i != score.end(); ++i)
+	{
+		char c = *i;
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
+	}
+
+	std::string asteroidsDestroyed = "Destroyed: " + std::to_string(player->asteroidsDestroyed);
+	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth -50 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * 10, (screenHeight - arenaHeight) / 2 + arenaHeight - 50);
+	for (std::string::iterator i = asteroidsDestroyed.begin(); i != asteroidsDestroyed.end(); ++i)
 	{
 		char c = *i;
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);
@@ -223,12 +265,12 @@ void drawFPS(std::string fps)
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0, currentWidth, 0 , currentHeight, -1.0, 1.0);
+	glOrtho(0, screenWidth, 0 , screenHeight, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 	glColor3f(1.0, 1.0, 1.0);
-	glRasterPos2f(0, 0);
+	glRasterPos2f((screenWidth - arenaWidth)/2+ 10, (screenHeight - arenaHeight)/2 + 10);
 	fps = "FPS: " + fps;
 	for (std::string::iterator i = fps.begin(); i != fps.end(); ++i)
 	{
@@ -247,7 +289,7 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
-
+	drawArena(arenaWidth, arenaHeight);
 	drawFPS(std::to_string(static_cast<int>(lastFPS)));
 	drawPlayerInfo(player);
 	drawPlayer(player);
@@ -305,41 +347,6 @@ void on_key_release(unsigned char key, int x, int y)
 	}
 }
 
-void reshape(int width, int height)
-{
-	currentHeight = (float)height;
-	currentWidth = (float)width;
-	if (lastWidth == 0.0f)
-	{
-		lastWidth = currentWidth;
-	}
-	if (lastHeight == 0.0f)
-	{
-		lastHeight = currentWidth;
-	}
-
-
-	player->playerSize = INIT_PLAYER_SIZE * (currentHeight + currentWidth) / (initHeight + initWidth);
-	player->thrustSpeed = player->playerSize / 2;
-	bulletSize = INIT_BULLET_SIZE * (currentHeight + currentWidth) / (initHeight + initWidth);
-	bulletSpeed = bulletSize / INIT_BULLET_SIZE * INIT_BULLET_SPEED;
-	
-	player->posX = player->posX / lastWidth * currentWidth ;
-	player->posY = player->posY / lastHeight * currentHeight;
-	for (auto& bullet : bullets)
-	{
-		bullet->posX = bullet->posX / lastWidth * currentWidth;
-		bullet->posY = bullet->posY / lastHeight * currentHeight;
-	}
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-currentWidth / 2, currentWidth / 2, -currentHeight / 2, currentHeight / 2, -1.0, 1.0);
-	glViewport(0, 0, currentWidth, currentHeight);
-	glMatrixMode(GL_MODELVIEW);
-	lastWidth = currentWidth;
-	lastHeight = currentHeight;
-	glutPostRedisplay();
-}
 
 void on_mouse_button(int btn, int state, int x, int y) 
 { 
@@ -360,8 +367,8 @@ void update_game_state(float dt)
 	asteroid_spawn_delay += dt;
 	if (asteroid_spawn_delay >= 2000.0 && asteroids.size() < INIT_ASTEROIDS_MAX)
 	{
-		int int_currentWidth = static_cast<int>(currentWidth);
-		int int_currentHeight = static_cast<int>(currentHeight);
+		int int_currentWidth = static_cast<int>(screenWidth);
+		int int_currentHeight = static_cast<int>(screenHeight);
 		float asteroidX = rand() % 100 + (int_currentWidth / 2); //100 just to make sure the asteroid is spawning outside the wall 
 		float asteroidY = rand() % 100 + (int_currentHeight / 2);
 		Asteroid* asteroid = new Asteroid(asteroidX, asteroidY);
@@ -404,8 +411,8 @@ void update_game_state(float dt)
 	for (int i = 0; i < bullets.size(); i++)
 	{
 		auto& bullet = bullets[i];
-		if (bullet->posX > currentWidth / 2 + BULLET_MAX_DIS_BEHIND_WALL || bullet->posX < -currentWidth / 2 - BULLET_MAX_DIS_BEHIND_WALL
-			|| bullet->posY > currentHeight / 2 + BULLET_MAX_DIS_BEHIND_WALL || bullet->posY < -currentHeight / 2 - BULLET_MAX_DIS_BEHIND_WALL)
+		if (bullet->posX > screenWidth / 2 + BULLET_MAX_DIS_BEHIND_WALL || bullet->posX < -screenWidth / 2 - BULLET_MAX_DIS_BEHIND_WALL
+			|| bullet->posY > screenHeight / 2 + BULLET_MAX_DIS_BEHIND_WALL || bullet->posY < -screenHeight / 2 - BULLET_MAX_DIS_BEHIND_WALL)
 		{
 			bullets.erase(bullets.begin() + i);
 			break;
@@ -418,21 +425,21 @@ void update_game_state(float dt)
 	}
 	for (auto& asteroid : asteroids)
 	{
-		if (asteroid->posX > currentWidth / 2 + ASTEROID_RADIUS)
+		if (asteroid->posX > screenWidth / 2 + ASTEROID_RADIUS)
 		{
-			asteroid->posX = -currentWidth / 2 - ASTEROID_RADIUS;
+			asteroid->posX = -screenWidth / 2 - ASTEROID_RADIUS;
 		}
-		else if (asteroid->posX < -currentWidth / 2 - ASTEROID_RADIUS)
+		else if (asteroid->posX < -screenWidth / 2 - ASTEROID_RADIUS)
 		{
-			asteroid->posX = currentWidth / 2 + ASTEROID_RADIUS;
+			asteroid->posX = screenWidth / 2 + ASTEROID_RADIUS;
 		}
-		if (asteroid->posY > currentHeight / 2 + ASTEROID_RADIUS)
+		if (asteroid->posY > screenHeight / 2 + ASTEROID_RADIUS)
 		{
-			asteroid->posY = -currentHeight / 2 - ASTEROID_RADIUS;
+			asteroid->posY = -screenHeight / 2 - ASTEROID_RADIUS;
 		}
-		else if (asteroid->posY < -currentHeight / 2 - ASTEROID_RADIUS)
+		else if (asteroid->posY < -screenHeight / 2 - ASTEROID_RADIUS)
 		{
-			asteroid->posY = currentHeight / 2 + ASTEROID_RADIUS;
+			asteroid->posY = screenHeight / 2 + ASTEROID_RADIUS;
 		}
 	}
 	for (auto& asteroid : asteroids)
@@ -474,39 +481,39 @@ void update_game_state(float dt)
 	if(GO_THROUGH_WALL == true)
 	{
 		//ship go through wall situation
-		if (player->posX < (-currentWidth / 2 - player->playerSize) && player->velocityX < 0)
+		if (player->posX < (-screenWidth / 2 - player->playerSize) && player->velocityX < 0)
 		{
-			player->posX = currentWidth / 2 + player->playerSize * 2;
+			player->posX = screenWidth / 2 + player->playerSize * 2;
 		}
-		else if (player->posX > (currentWidth / 2 + player->playerSize) && player->velocityX > 0)
+		else if (player->posX > (screenWidth / 2 + player->playerSize) && player->velocityX > 0)
 		{
-			player->posX = -currentWidth / 2 - player->playerSize * 2;
+			player->posX = -screenWidth / 2 - player->playerSize * 2;
 		}
 	
-		if (player->posY < (-currentHeight / 2 - player->playerSize) && player->velocityY < 0)
+		if (player->posY < (-screenHeight / 2 - player->playerSize) && player->velocityY < 0)
 		{
-			player->posY = currentHeight / 2 + player->playerSize * 2;
+			player->posY = screenHeight / 2 + player->playerSize * 2;
 		}
-		else if (player->posY > (currentHeight / 2 + player->playerSize) && player->velocityY > 0)
+		else if (player->posY > (screenHeight / 2 + player->playerSize) && player->velocityY > 0)
 		{
-			player->posY = -currentHeight / 2 - player->playerSize * 2;
+			player->posY = -screenHeight / 2 - player->playerSize * 2;
 		}
 	}
 	else 
 	{
-		if (player->posX < (-currentWidth / 2 + player->playerSize))
+		if (player->posX < (-screenWidth / 2 + player->playerSize))
 		{
 			player->die();
 		}
-		else if(player->posX > (currentWidth / 2 - player->playerSize))
+		else if(player->posX > (screenWidth / 2 - player->playerSize))
 		{
 			player->die();
 		}
-		if (player->posY < (-currentHeight / 2 + player->playerSize))
+		if (player->posY < (-screenHeight / 2 + player->playerSize))
 		{
 			player->die();
 		}
-		else if(player->posY > (currentHeight / 2 - player->playerSize))
+		else if(player->posY > (screenHeight / 2 - player->playerSize))
 		{
 			player->die();
 		}
@@ -518,6 +525,7 @@ void update_game_state(float dt)
 			if(distance(bullets[i]->posX, bullets[i]->posY, asteroids[j]->posX, asteroids[j]->posY) <= (ASTEROID_RADIUS + bulletSize))
 			{
 				player->score += 100;
+				player->asteroidsDestroyed++;
 				bullets.erase(bullets.begin() + i);
 				asteroids.erase(asteroids.begin() + j);
 			}
@@ -529,13 +537,13 @@ void update_game_state(float dt)
 			{
 				asteroids.erase(asteroids.begin() + i);
 				player->die();
-				if(player->live == 0)
-				{
-					exit(EXIT_SUCCESS);
-				}
 			}
 	}
-
+	if (player->live == 0)
+	{
+		std::cout << "die" << std::endl;
+		exit(EXIT_SUCCESS);
+	}
 }
 void idle()
 {
@@ -557,27 +565,22 @@ void init(int initScreenWidth, int initScreenHeight)
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
-	const int screenWidth = glutGet(GLUT_SCREEN_WIDTH);
-	const int screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
+	screenWidth = glutGet(GLUT_SCREEN_WIDTH);
+	screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);	
 
-	if (FULLSCREEN_MODE == false)
-	{
-		glutInitWindowPosition((screenWidth - initWidth) / 2, (screenHeight - initHeight) / 2);
-		glutInitWindowSize(initWidth, initHeight);
-		init(initWidth, initHeight);
-	}
 	glutCreateWindow("Assignment 1");
-	if (FULLSCREEN_MODE == true)
-	{
-		init(screenWidth, screenHeight);
-		glutFullScreen();
-	}
+
+	init(screenWidth, screenHeight);
+	glutFullScreen();
 	srand(time(NULL));
-	player = new Player(0, 0);
 
-	glutReshapeFunc(reshape);
+	//change the arena size here
+	arenaWidth = screenWidth ;
+	arenaHeight = screenHeight ;
 
+	player = new Player(-arenaWidth /2 + 200, -arenaHeight /2 + 200);
+	player->playerDirectionRadian=  -45 * PI / 180;
 	//mouse function
 	glutMouseFunc(on_mouse_button);
 
