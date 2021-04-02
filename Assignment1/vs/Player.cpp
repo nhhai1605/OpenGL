@@ -3,6 +3,8 @@ Player::Player(float posX, float posY)
 {
 	this->posX = posX;
 	this->posY = posY;
+	this->spawningX = posX;
+	this->spawningY = posY;
 }
 
 Player::~Player()
@@ -18,9 +20,12 @@ void Player::setPlayerPos(float x, float y)
 
 void Player::die()
 {
-	posX = 0.0;
-	posY= 0.0;
-	live--;
+	posX = spawningX;
+	posY= spawningY;
+	velocityX = 0.0;
+	velocityY = 0.0;
+	playerDirectionRadian = 0.0f;
+	life--;
 }
 
 void Player::move()
@@ -29,24 +34,37 @@ void Player::move()
 	posY += velocityY;
 }
 
-void Player::rotateLeft(float dt)
+void Player::respawn()
 {
-	float angle = (double)playerDirectionRadian * 180 / PI;
+	life = LIFE;
+	posX = spawningX;
+	posY = spawningY;
+	velocityX = 0.0;
+	velocityY = 0.0;
+	playerDirectionRadian = 0.0f;
+	asteroidsDestroyed = 0;
+	score = 0;
+}
+
+
+void Player::rotateLeft()
+{
+	int angle = (int)((double)playerDirectionRadian * 180 / PI);
 	angle += ROTATION_SPEED;
-	if ((int)angle % 360 == 0)
+	if (angle >= 360)
 	{
-		angle = 0;
+		angle -= 360;
 	}
 	playerDirectionRadian = angle * PI / 180;
 }
 
-void Player::rotateRight(float dt)
+void Player::rotateRight()
 {
-	float angle = (double)playerDirectionRadian * 180 / PI;
+	int angle = (int)((double)playerDirectionRadian * 180 / PI);
 	angle -= ROTATION_SPEED;
-	if ((int)angle % 360 == 0)
+	if (angle <= 360)
 	{
-		angle = 0;
+		angle += 360;
 	}
 	playerDirectionRadian = angle * PI / 180;
 }
