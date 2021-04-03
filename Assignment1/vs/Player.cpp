@@ -25,6 +25,7 @@ void Player::die()
 	velocityX = 0.0;
 	velocityY = 0.0;
 	playerDirectionRadian = 0.0f;
+	playerSize = PLAYER_SIZE;
 	life--;
 }
 
@@ -42,6 +43,7 @@ void Player::respawn()
 	velocityX = 0.0;
 	velocityY = 0.0;
 	playerDirectionRadian = 0.0f;
+	playerSize = PLAYER_SIZE;
 	asteroidsDestroyed = 0;
 	score = 0;
 }

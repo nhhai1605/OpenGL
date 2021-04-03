@@ -21,6 +21,9 @@
     <ClCompile Include="Particle.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="Explosion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -36,6 +39,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="Particle.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Explosion.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

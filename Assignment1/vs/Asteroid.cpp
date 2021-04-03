@@ -45,7 +45,6 @@ Asteroid::Asteroid(float posX, float posY, float radius, float playerX, float pl
 
 Asteroid::~Asteroid()
 {
-	std::cout << "asteroid deleted " << std::endl;
 }
 
 void Asteroid::setAsteroidPos(float x, float y)

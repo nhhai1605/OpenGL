@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "Asteroid.h"
 #include "Particle.h"
+#include "Explosion.h"
 #if _WIN32
 #   include <Windows.h>
 #else
@@ -20,7 +21,7 @@
 #endif
 
 //true for seeing the objects' hitbox
-#define SHOW_HITBOX false
+#define SHOW_HITBOX true
 
 //false to activate the "touch wall then die" mode
 #define GO_THROUGH_WALL false
@@ -40,17 +41,22 @@ float player_outline_color[] = { 1.0, 0.0, 0.0 };
 float player_fill_color[] = {1.0, 1.0, 1.0};
 
 //Boost particle
-int particle_num = 50;
-int time_between_particles = 50;
-float particle_starting_size = 10.0f;
-int time_particle_decay = 50;
-float particle_color[] = { 1.0, 0.5, 0.05 };
+int particleNum = 200;
+float decayTime = 2000.0f; // ms
+float sizeReduceRate = INIT_PARTICLE_SIZE / decayTime; //per ms
+float particle_color[] = { 1.0, 0.2, 0.02};
+float particleSpeed = 200.0f;
+float timeBetweenParticles = 10.0f;
+float particle_dt = 0.0f;
+
+//explosion
+int explosionParticles = 200;
 
 //Bullet color
 float bullet_color[] = { 1.0, 0.0, 0.0 };
 
 //arenacolor
-float arena_color[] = { 14.0f / 255.0f, 2.0f / 255.0f, 59.0f / 255.0f};
+float arena_color[] = { 0.0f, 0.0f, 0.0f};
 
 //wall warning color
 float warning_color[] = { 1.0, 0.0, 0.0 };
@@ -59,14 +65,13 @@ float warning_color[] = { 1.0, 0.0, 0.0 };
 int currRound = 1;
 int asteroids_number = INIT_ASTEROIDS_NUMBER * currRound;
 int asteroid_spawn_rate = 2000;
-
 Player* player;
 std::vector <Bullet*> bullets;
 std::vector <Asteroid*> asteroids;
 KeyState keyArray[127], mousePressed;
 std::vector <WallWarning> warnings;
 std::vector <Particle*> particles;
-
+std::vector <Explosion*> explosions;
 //Global variables
 int screenWidth, screenHeight;
 float currentFPS = 0.0f, lastFPS = 0.0f;
@@ -80,13 +85,57 @@ bool playerDied = false;
 int time_since_game_start = 0;
 int after_die_time = 0;
 bool invulnerable_state = false;
-int blinking_num = INVULNERABLE_TIME / BLINKING_DUR;
+int blinking_num = INVULNERABLE_TIME / BLINKING_DUR;	
 float blinking_time = BLINKING_DUR;
+float blackHoleX = 0.0f, blackHoleY = 0.0f;
 
 float distance(float x1, float y1, float x2, float y2)
 {
 	return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 }
+
+void restartGame()
+{
+	playerDied = false;
+	player->respawn();
+	asteroids.clear();
+	particles.clear();
+	explosions.clear();
+	currRound = 1;
+	int asteroids_number = INIT_ASTEROIDS_NUMBER * currRound;
+	blackHoleX = (rand() % (int)(arenaWidth - 2 * BLACK_HOLE_RADIUS)) + (screenWidth - arenaWidth) / 2 + BLACK_HOLE_RADIUS;
+	blackHoleY = (rand() % (int)(arenaHeight - 2 * BLACK_HOLE_RADIUS)) + (screenHeight - arenaHeight) / 2 + BLACK_HOLE_RADIUS;
+}
+
+void drawBlackHole(float posX, float posY)
+{
+	glColor3f(0.8, 0.3, 0.8);
+	glPointSize(5.0f);
+	glBegin(GL_POINTS);
+	for (float i = -BLACK_HOLE_RADIUS; i <= BLACK_HOLE_RADIUS; i += 0.1)
+	{
+		float circleX = i;
+		float circleY = sqrt(BLACK_HOLE_RADIUS * BLACK_HOLE_RADIUS - circleX * circleX);
+		glColor3f(0.8, 0.3, 0.8);
+		glVertex3f(circleX + posX, posY + circleY, -0.5);
+		glVertex3f(circleX + posX, posY - circleY, -0.5);
+	}
+	glEnd();
+	int space = 5;
+	glBegin(GL_POINTS);
+	glColor3f(0.5, 0.1, 0.5);
+	for (int i = 0; i < 300; i++)
+	{
+		float angle = 0.1 * i;
+		float r = glutGet(GLUT_ELAPSED_TIME) / 40;
+		float x = (space * angle) * cos(angle - r);
+		float y = (space * angle) * sin(angle - r);
+		glVertex3f(x + posX, posY + y, -0.5);
+	}
+	glEnd();
+
+}
+
 
 void drawArena(int arenaWidth, int arenaHeight)
 {
@@ -258,6 +307,7 @@ void drawPlayer(Player * player)
 		glVertex3f(x, y, 0.0);
 		glVertex3f(x2 + x, y2 + y, 0.0);
 		glEnd();
+
 		if (blinking_num > 0)
 		{
 			blinking_time -= dt;
@@ -293,12 +343,14 @@ void drawPlayer(Player * player)
 		glVertex3f(x, y, 0.0);
 		glVertex3f(x2 + x, y2 + y, 0.0);
 		glEnd();
-
-		if (isThrusting == true)
-		{
-
-			
-		}
+	}
+	for (auto& particle : particles)
+	{
+		glPointSize(particle->size);
+		glColor3f(particle->color[0], particle->color[1], particle->color[2]);
+		glBegin(GL_POINTS);
+		glVertex3f(particle->posX, particle->posY, 0.0);
+		glEnd();
 	}
 
 	if (SHOW_HITBOX == true)
@@ -320,7 +372,7 @@ void drawPlayer(Player * player)
 
 void drawBullet(Bullet * bullet)
 {
-	glPointSize(BULLET_SIZE);
+	glPointSize(bullet->size);
 	glColor3f(bullet_color[0], bullet_color[1], bullet_color[2]);
 	glBegin(GL_POINTS);
 	glVertex3f(bullet->posX, bullet->posY, 0.0);
@@ -357,6 +409,19 @@ void drawAsteroid(Asteroid* asteroid)
 			glVertex3f(circleX + asteroid->posX, asteroid->posY + circleY, 1.0);
 			glVertex3f(circleX + asteroid->posX, asteroid->posY - circleY, 1.0);
 		}
+		glEnd();
+	}
+}
+
+void drawExplosion(Explosion * explosion)
+{
+	glPointSize(explosion->particleSize);
+	for (auto& particle : explosion->particles)
+	{
+		glColor3f(particle->color[0], particle->color[1], particle->color[2]);
+		glPointSize(particle->size);
+		glBegin(GL_POINTS);
+		glVertex3f(particle->posX, particle->posY, 0.0);
 		glEnd();
 	}
 }
@@ -453,11 +518,16 @@ void display(void)
 			{
 				drawBullet(bullet);
 			}
+			for (auto& explosion : explosions)
+			{
+				drawExplosion(explosion);
+			}
 		}
 		for (auto& asteroid : asteroids)
 		{
 			drawAsteroid(asteroid);
 		}
+		drawBlackHole(blackHoleX, blackHoleY);
 	}
 	else
 	{
@@ -491,6 +561,10 @@ void on_key_press(unsigned char key, int x, int y)
 		{
 			keyArray[int('d')] = KeyState::PRESSED;
 		}
+		if (key == 't')
+		{
+			explosions.push_back(new Explosion(player->posX, player->posY, player->playerSize * 3, particle_color, explosionParticles, EXPLOSION_PARTICLE_SIZE));
+		}
 	
 	}
 	else if(!gameStarted)
@@ -512,8 +586,7 @@ void on_key_press(unsigned char key, int x, int y)
 		}
 		else
 		{
-			playerDied = false;
-			player->respawn();
+			restartGame();
 		}
 	}
 
@@ -535,7 +608,6 @@ void on_key_release(unsigned char key, int x, int y)
 		keyArray[int('d')] = KeyState::FREE;
 	}
 }
-
 
 void on_mouse_button(int btn, int state, int x, int y)
 {
@@ -565,20 +637,154 @@ void on_mouse_button(int btn, int state, int x, int y)
 	{
 		if (btn == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 		{
-			playerDied = false;
-			player->respawn();
+			restartGame();
 		}
 		else if (btn == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 		{
-			playerDied = false;
-			player->respawn();
+			restartGame();
 		}
 	}
 }
 
-void update_game_state(float dt)
+void playerMovementAndParticles()
 {
-	//Asteroid spaw delay time
+	//Ship movement
+	if (keyArray[int('a')] == KeyState::PRESSED)
+	{
+		player->rotateLeft();
+	}
+	if (keyArray[int('d')] == KeyState::PRESSED)
+	{
+		player->rotateRight();
+	}
+	if (keyArray[int('w')] == KeyState::PRESSED)
+	{
+		if (player->velocityX <= MAX_SPEED)
+		{
+			player->velocityX -= player->thrustSpeed * sin(player->playerDirectionRadian) / currentFPS;
+		}
+		if (player->velocityY <= MAX_SPEED)
+		{
+			player->velocityY += player->thrustSpeed * cos(player->playerDirectionRadian) / currentFPS;
+		}
+		isThrusting = true;
+		if (particles.size() < particleNum)
+		{
+			if (particle_dt >= timeBetweenParticles)
+			{
+				Particle* particle = new Particle(player, INIT_PARTICLE_SIZE, particle_color);
+				particles.push_back(particle);
+				particle->velocityX = particleSpeed / currentFPS * -sin(particle->particleDirectionRadian);
+				particle->velocityY = particleSpeed / currentFPS * cos(particle->particleDirectionRadian);
+				particle_dt -= timeBetweenParticles;
+			}
+			else
+			{
+				particle_dt += dt;
+			}
+		}
+	}
+	else
+	{
+		isThrusting = false;
+		player->velocityX -= FRICTION * player->velocityX / currentFPS;
+		player->velocityY -= FRICTION * player->velocityY / currentFPS;
+	}
+	player->move();
+
+	for (int i = 0; i < particles.size(); i++)
+	{
+		particles[i]->move();
+		particles[i]->size -= dt * sizeReduceRate;
+		if (particles[i]->size <= 0.0)
+		{
+			delete particles[i];
+			particles.erase(particles.begin() + i);
+			break;
+		}
+		if (particles[i]->posX < (screenWidth - arenaWidth) / 2
+			|| particles[i]->posX >  arenaWidth + (screenWidth - arenaWidth) / 2
+			|| particles[i]->posY < (screenHeight - arenaHeight) / 2
+			|| particles[i]->posY > arenaHeight + (screenHeight - arenaHeight) / 2)
+		{
+			delete particles[i];
+			particles.erase(particles.begin() + i);
+			break;
+		}
+	}
+
+	if (GO_THROUGH_WALL == true || invulnerable_state)
+	{
+		//ship go through wall situation
+		if (player->posX < ((screenWidth - arenaWidth) / 2 - player->playerSize) && player->velocityX < 0)
+		{
+			player->posX = arenaWidth + (screenWidth - arenaWidth) / 2 + player->playerSize * 2;
+		}
+		else if (player->posX > (arenaWidth + (screenWidth - arenaWidth) / 2 + player->playerSize) && player->velocityX > 0)
+		{
+			player->posX = (screenWidth - arenaWidth) / 2 - player->playerSize * 2;
+		}
+
+		if (player->posY < ((screenHeight - arenaHeight) / 2 - player->playerSize) && player->velocityY < 0)
+		{
+			player->posY = arenaHeight + (screenHeight - arenaHeight) / 2 + player->playerSize * 2;
+		}
+		else if (player->posY > (arenaHeight + (screenHeight - arenaHeight) / 2 + player->playerSize) && player->velocityY > 0)
+		{
+			player->posY = (screenHeight - arenaHeight) / 2 - player->playerSize * 2;
+		}
+	}
+	else
+	{
+		if (player->posX < (screenWidth - arenaWidth) / 2
+			|| player->posX >  arenaWidth + (screenWidth - arenaWidth) / 2
+			|| player->posY < (screenHeight - arenaHeight) / 2
+			|| player->posY > arenaHeight + (screenHeight - arenaHeight) / 2)
+		{
+			if (!invulnerable_state)
+			{
+				player->die();
+				invulnerable_state = true;
+			}
+		}
+		warnings.clear();
+		if (player->posX < (screenWidth - arenaWidth) / 2 + WARNING_DISTANCE)
+		{
+			warnings.push_back(WallWarning::W);
+		}
+		if (player->posX > (arenaWidth + (screenWidth - arenaWidth) / 2 - WARNING_DISTANCE))
+		{
+			warnings.push_back(WallWarning::E);
+		}
+		if (player->posY < (screenHeight - arenaHeight) / 2 + WARNING_DISTANCE)
+		{
+			warnings.push_back(WallWarning::S);
+		}
+		if (player->posY > (arenaHeight + (screenHeight - arenaHeight) / 2 - WARNING_DISTANCE))
+		{
+			warnings.push_back(WallWarning::N);
+		}
+	}
+	if (player->life < 0)
+	{
+		playerDied = true;
+	}
+	if (invulnerable_state)
+	{
+		after_die_time += dt;
+	}
+	else
+	{
+		after_die_time = 0;
+	}
+	if (after_die_time >= INVULNERABLE_TIME)
+	{
+		invulnerable_state = false;
+	}
+}
+
+void asteroidSpawnAndMovement(float dt)
+{
 	asteroid_spawn_delay += dt;
 	if (asteroid_spawn_delay >= asteroid_spawn_rate && asteroids_number > 0)
 	{
@@ -589,11 +795,11 @@ void update_game_state(float dt)
 		float asteroidX, asteroidY;
 		if (side == 0)
 		{
-			asteroidX = rand() % 100 + ((int_currentWidth-(int)arenaWidth) / 2 + arenaWidth + 100);
+			asteroidX = rand() % 100 + ((int_currentWidth - (int)arenaWidth) / 2 + arenaWidth + 100);
 		}
 		else
 		{
-			asteroidX = rand() % 100 + ((int_currentWidth - (int)arenaWidth) / 2 - 200) ;
+			asteroidX = rand() % 100 + ((int_currentWidth - (int)arenaWidth) / 2 - 200);
 		}
 		side = rand() % 2;
 		if (side == 0)
@@ -606,8 +812,8 @@ void update_game_state(float dt)
 		}
 		int asteroid_radius = rand() % 50 + 50;
 		Asteroid* asteroid = new Asteroid(asteroidX, asteroidY, asteroid_radius, player->posX, player->posY, AsteroidState::NOTSPLITED);
-		asteroid->velocityX -= asteroid->asteroidSpeed * sin(asteroid->asteroidDirectionRadian) / currentFPS;
-		asteroid->velocityY += asteroid->asteroidSpeed * cos(asteroid->asteroidDirectionRadian) / currentFPS;
+		asteroid->velocityX = asteroid->asteroidSpeed * -sin(asteroid->asteroidDirectionRadian) / currentFPS;
+		asteroid->velocityY = asteroid->asteroidSpeed * cos(asteroid->asteroidDirectionRadian) / currentFPS;
 		asteroids.push_back(asteroid);
 		asteroid_spawn_delay = 0.0;
 	}
@@ -615,47 +821,6 @@ void update_game_state(float dt)
 	{
 		currRound++;
 		asteroids_number = INIT_ASTEROIDS_NUMBER * currRound;
-	}
-	//Shoot delay time
-	shoot_delay += dt;
-	if (shoot_delay >= TIME_DELAY_BETWEEN_TWO_SHOTS)
-	{
-		shoot_delay = 0.0f;
-		shootable = true;
-	}
-
-	//Shooting
-	if (mousePressed == KeyState::PRESSED && shootable == true)
-	{
-		shootable = false;
-		shoot_delay = 0.0f;
-		float size = player->playerSize;
-		float radian = player->playerDirectionRadian;
-		float posX = player->posX;
-		float posY = player->posY;
-		posX += -size * 1.5 * sin(radian);
-		posY += size * 1.5 * cos(radian);
-		Bullet* bullet = new Bullet(posX, posY, radian);
-		bullets.push_back(bullet);
-	}
-
-	//delete bullet that are out of the wall
-	for (int i = 0; i < bullets.size(); i++)
-	{
-		if (bullets[i]->posX > arenaWidth + (screenWidth - arenaWidth) / 2
-			|| bullets[i]->posX < (screenWidth - arenaWidth) / 2
-			|| bullets[i]->posY >  arenaHeight + (screenHeight - arenaHeight) / 2
-			|| bullets[i]->posY < (screenHeight - arenaHeight) / 2)
-		{
-			delete bullets[i];
-			bullets.erase(bullets.begin() + i);
-			break;
-		}
-	}
-	for (auto& bullet : bullets)
-	{
-		bullet->posX -= sin(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS;
-		bullet->posY += cos(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS;
 	}
 	for (auto& asteroid : asteroids)
 	{
@@ -726,106 +891,10 @@ void update_game_state(float dt)
 	{
 		if (distance(player->posX, player->posY, asteroids[i]->posX, asteroids[i]->posY) <= (asteroids[i]->radius + player->playerSize))
 		{
-			if(!invulnerable_state)
-			{
-				player->die();
-				invulnerable_state = true; 
-			}
-		}
-	}
-	//Ship movement
-	if (keyArray[int('a')] == KeyState::PRESSED)
-	{
-		player->rotateLeft();
-	}
-	if (keyArray[int('d')] == KeyState::PRESSED)
-	{
-		player->rotateRight();
-	}
-	if (keyArray[int('w')] == KeyState::PRESSED)
-	{
-		if (player->velocityX <= MAX_SPEED)
-		{
-			player->velocityX -= player->thrustSpeed * sin(player->playerDirectionRadian) / currentFPS;
-		}
-		if (player->velocityY <= MAX_SPEED)
-		{
-			player->velocityY += player->thrustSpeed * cos(player->playerDirectionRadian) / currentFPS;
-		}
-		isThrusting = true;
-	}
-	else
-	{
-		isThrusting = false;
-		player->velocityX -= FRICTION * player->velocityX / currentFPS;
-		player->velocityY -= FRICTION * player->velocityY / currentFPS;
-	}
-	player->move();
-	
-
-	if(GO_THROUGH_WALL == true || invulnerable_state)
-	{
-		//ship go through wall situation
-		if (player->posX < (- player->playerSize) && player->velocityX < 0)
-		{
-			player->posX = screenWidth + player->playerSize * 2;
-		}
-		else if (player->posX > (screenWidth + player->playerSize) && player->velocityX > 0)
-		{
-			player->posX = - player->playerSize * 2;
-		}
-	
-		if (player->posY < (- player->playerSize) && player->velocityY < 0)
-		{
-			player->posY = screenHeight  + player->playerSize * 2;
-		}
-		else if (player->posY > (screenHeight + player->playerSize) && player->velocityY > 0)
-		{
-			player->posY = - player->playerSize * 2;
-		}
-	}
-	else 
-	{
-		if (player->posX < (screenWidth - arenaWidth) / 2 
-			|| player->posX >  arenaWidth + (screenWidth - arenaWidth) / 2 
-			|| player->posY < (screenHeight - arenaHeight) / 2 
-			|| player->posY > arenaHeight + (screenHeight - arenaHeight) / 2)
-		{
 			if (!invulnerable_state)
 			{
 				player->die();
 				invulnerable_state = true;
-			}
-		}
-		warnings.clear();
-		if (player->posX < (screenWidth - arenaWidth) / 2 + WARNING_DISTANCE)
-		{
-			warnings.push_back(WallWarning::W);
-		}
-		if (player->posX > (arenaWidth + (screenWidth - arenaWidth) / 2 - WARNING_DISTANCE))
-		{
-			warnings.push_back(WallWarning::E);
-		}
-		if (player->posY < (screenHeight - arenaHeight) / 2  + WARNING_DISTANCE)
-		{
-			warnings.push_back(WallWarning::S);
-		}
-		if (player->posY > (arenaHeight + (screenHeight - arenaHeight) / 2 - WARNING_DISTANCE))
-		{
-			warnings.push_back(WallWarning::N);
-		}
-
-	}
-	for (int i = 0; i < bullets.size(); i++)
-	{
-		for (auto& asteroid : asteroids)
-		{
-			if(distance(bullets[i]->posX, bullets[i]->posY, asteroid->posX, asteroid->posY) <= (asteroid->radius + BULLET_SIZE))
-			{
-				asteroid->getHit();
-				delete bullets[i];
-				bullets.erase(bullets.begin() + i);
-				break;
 			}
 		}
 	}
@@ -833,7 +902,7 @@ void update_game_state(float dt)
 	{
 		if (asteroids[j]->hp <= 0)
 		{
-			player->score += 100;
+			player->score += asteroids[j]->radius;
 			player->asteroidsDestroyed++;
 			if (asteroids[j]->state == AsteroidState::NOTSPLITED)
 			{
@@ -854,28 +923,218 @@ void update_game_state(float dt)
 				asteroids.push_back(a1);
 				asteroids.push_back(a2);
 			}
+			explosions.push_back(new Explosion(asteroids[j]->posX, asteroids[j]->posY, asteroids[j]->radius, particle_color, explosionParticles, EXPLOSION_PARTICLE_SIZE));
 			delete asteroids[j];
 			asteroids.erase(asteroids.begin() + j);
 			break;
 		}
 	}
-	if (player->life < 0)
+}
+
+void bulletSpawnAndMovement(float dt)
+{
+	shoot_delay += dt;
+	if (shoot_delay >= TIME_DELAY_BETWEEN_TWO_SHOTS)
 	{
-		playerDied = true;
+		shoot_delay = 0.0f;
+		shootable = true;
 	}
-	if (invulnerable_state)
+
+	//Shooting
+	if (mousePressed == KeyState::PRESSED && shootable == true)
 	{
-		after_die_time += dt;
+		shootable = false;
+		shoot_delay = 0.0f;
+		float size = player->playerSize;
+		float radian = player->playerDirectionRadian;
+		float posX = player->posX;
+		float posY = player->posY;
+		posX += -size * 1.5 * sin(radian);
+		posY += size * 1.5 * cos(radian);
+		Bullet* bullet = new Bullet(posX, posY, radian, BULLET_SIZE);
+		bullet->velocityX = -sin(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS;
+		bullet->velocityY = cos(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS;
+		bullets.push_back(bullet);
 	}
-	else
+
+	//delete bullet that are out of the wall
+	for (int i = 0; i < bullets.size(); i++)
 	{
-		after_die_time = 0;
+		if (bullets[i]->posX > arenaWidth + (screenWidth - arenaWidth) / 2
+			|| bullets[i]->posX < (screenWidth - arenaWidth) / 2
+			|| bullets[i]->posY >  arenaHeight + (screenHeight - arenaHeight) / 2
+			|| bullets[i]->posY < (screenHeight - arenaHeight) / 2)
+		{
+			delete bullets[i];
+			bullets.erase(bullets.begin() + i);
+			break;
+		}
 	}
-	if (after_die_time >= INVULNERABLE_TIME)
+
+	for (int i = 0; i < bullets.size(); i++)
 	{
-		invulnerable_state = false;
+		bullets[i]->move();
+		for (auto& asteroid : asteroids)
+		{
+			if (distance(bullets[i]->posX, bullets[i]->posY, asteroid->posX, asteroid->posY) <= (asteroid->radius + BULLET_SIZE))
+			{
+				asteroid->getHit();
+				delete bullets[i];
+				bullets.erase(bullets.begin() + i);
+				break;
+			}
+		}
 	}
 }
+
+void explosionEffect(float dt)
+{
+	for (int i = 0; i < explosions.size(); i++)
+	{
+		for (int j = 0; j < explosions[i]->particles.size(); j++)
+		{
+			explosions[i]->particles[j]->move();
+			explosions[i]->particles[j]->size -= dt * explosions[i]->sizeReduceRate;
+			if (explosions[i]->particles[j]->size <= 0.0)
+			{
+				delete explosions[i]->particles[j];
+				explosions[i]->particles.erase(explosions[i]->particles.begin() + j);
+				break;
+			}
+		}
+		if (explosions[i]->particles.size() == 0)
+		{
+			delete explosions[i];
+			explosions.erase(explosions.begin() + i);
+			break;
+		}
+	}
+}
+
+void blackHolePulling(float dt)
+{
+	for (int i = 0; i < bullets.size(); i++)
+	{
+		if (distance(bullets[i]->posX, bullets[i]->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS + BULLET_SIZE)
+		{
+			float forceX = blackHoleX - bullets[i]->posX;
+			float forceY = blackHoleY - bullets[i]->posY;
+			float r = sqrt(forceX * forceX + forceY * forceY);
+			//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
+			float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
+			forceX *= fg / r;
+			forceY *= fg / r;
+			bullets[i]->velocityX += forceX;
+			bullets[i]->velocityY += forceY;
+			float r2 = sqrt(bullets[i]->velocityX * bullets[i]->velocityX + bullets[i]->velocityY * bullets[i]->velocityY);
+			bullets[i]->velocityX *= 3.0f / r2;
+			bullets[i]->velocityY *= 3.0f / r2;
+		}
+		if (distance(bullets[i]->posX, bullets[i]->posY, blackHoleX, blackHoleY) <= 10.0f)
+		{
+			bullets[i]->size -= 5.0f;
+			if (bullets[i]->size <= 0)
+			{
+				delete bullets[i];
+				bullets.erase(bullets.begin() + i);
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < asteroids.size(); i++)
+	{
+		if (distance(asteroids[i]->posX, asteroids[i]->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS + asteroids[i]->radius)
+		{
+			float forceX = blackHoleX - asteroids[i]->posX;
+			float forceY = blackHoleY - asteroids[i]->posY;
+			float r = sqrt(forceX * forceX + forceY * forceY);
+			//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
+			float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
+			forceX *= fg / r;
+			forceY *= fg / r;
+			asteroids[i]->velocityX += forceX;
+			asteroids[i]->velocityY += forceY;
+			float r2 = sqrt(asteroids[i]->velocityX * asteroids[i]->velocityX + asteroids[i]->velocityY * asteroids[i]->velocityY);
+			asteroids[i]->velocityX *= 3.0f / r2;
+			asteroids[i]->velocityY *= 3.0f / r2;
+		}
+		if (distance(asteroids[i]->posX, asteroids[i]->posY, blackHoleX, blackHoleY) <= 10.0f)
+		{
+			asteroids[i]->radius-= 5.0f;
+			if (asteroids[i]->radius <= 0)
+			{
+				delete asteroids[i];
+				asteroids.erase(asteroids.begin() + i);
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < particles.size(); i++)
+	{
+		if (distance(particles[i]->posX, particles[i]->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS + particles[i]->radius)
+		{
+			float forceX = blackHoleX - particles[i]->posX;
+			float forceY = blackHoleY - particles[i]->posY;
+			float r = sqrt(forceX * forceX + forceY * forceY);
+			//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
+			float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
+			forceX *= fg / r;
+			forceY *= fg / r;
+			particles[i]->velocityX += forceX;
+			particles[i]->velocityY += forceY;
+			float r2 = sqrt(particles[i]->velocityX * particles[i]->velocityX + particles[i]->velocityY * particles[i]->velocityY);
+			particles[i]->velocityX *= 3.0f / r2;
+			particles[i]->velocityY *= 3.0f / r2;
+		}
+		if (distance(particles[i]->posX, particles[i]->posY, blackHoleX, blackHoleY) <= 10.0f )
+		{
+			particles[i]->radius -= 5.0f;
+			if (particles[i]->radius <= 0)
+			{
+				delete particles[i];
+				particles.erase(particles.begin() + i);
+				break;
+			}
+		}
+	}
+
+	if (distance(player->posX, player->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS + player->playerSize)
+	{
+		float forceX = blackHoleX - player->posX;
+		float forceY = blackHoleY - player->posY;
+		float r = sqrt(forceX * forceX + forceY * forceY);
+		//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
+		float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
+		forceX *= fg / r;
+		forceY *= fg / r;
+		player->velocityX += forceX;
+		player->velocityY += forceY;
+		float r2 = sqrt(player->velocityX * player->velocityX + player->velocityY * player->velocityY);
+		player->velocityX *= 3.0f / r2;
+		player->velocityY *= 3.0f / r2;
+	}
+	if (distance(player->posX, player->posY, blackHoleX, blackHoleY) <= 10.0f)
+	{
+		player->playerSize -= 5.0f;
+		if (player->playerSize <= 0)
+		{
+			player->die();
+			invulnerable_state = true;
+		}
+	}
+}
+
+void update_game_state(float dt)
+{
+	playerMovementAndParticles();
+	asteroidSpawnAndMovement(dt);
+	bulletSpawnAndMovement(dt);
+	explosionEffect(dt);
+	blackHolePulling(dt);
+}
+
 void idle()
 {
 	float t = glutGet(GLUT_ELAPSED_TIME);
@@ -932,7 +1191,8 @@ int main(int argc, char** argv)
 	init(screenWidth, screenHeight);
 	glutFullScreen();
 	srand(time(NULL));
-	
+	blackHoleX = (rand() % (int)(arenaWidth - 2 * BLACK_HOLE_RADIUS)) + (screenWidth - arenaWidth) / 2 + BLACK_HOLE_RADIUS;
+	blackHoleY = (rand() % (int)(arenaHeight - 2 * BLACK_HOLE_RADIUS)) + (screenHeight - arenaHeight) / 2 + BLACK_HOLE_RADIUS;
 	if (SPAWNING_IN_MIDDLE)
 	{
 		player = new Player(screenWidth / 2, screenHeight / 2);

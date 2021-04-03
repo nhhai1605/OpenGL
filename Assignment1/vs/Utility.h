@@ -21,8 +21,14 @@
 #define INIT_ASTEROIDS_NUMBER 3
 #define LIFE 3
 #define INVULNERABLE_TIME 2000
+#define INIT_PARTICLE_SIZE 10.0f
 #define BLINKING_DUR 100
 #define PLAYER_DAMGE 10
+#define EXPLOSION_DECAY_TIME 1000.0f
+#define EXPLOSION_SPEED 200.0f
+#define EXPLOSION_PARTICLE_SIZE 7.5f
+#define BLACK_HOLE_RADIUS 150.0f
+#define BL_MASS 1000.0f
 enum class WallWarning { N, E, S, W };
 enum class KeyState { FREE, PRESSED };
 enum class AsteroidState { SPLITED, NOTSPLITED };
