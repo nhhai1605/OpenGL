@@ -34,9 +34,6 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="guide.html" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{B7E28377-D23E-4CA9-A439-0BE2FDEC86B6}</ProjectGuid>

@@ -51,22 +51,22 @@ void Player::respawn()
 
 void Player::rotateLeft()
 {
-	int angle = (int)((double)playerDirectionRadian * 180 / PI);
+	float angle = (float)((double)playerDirectionRadian * 180.0f / PI);
 	angle += ROTATION_SPEED;
 	if (angle >= 360)
 	{
 		angle -= 360;
 	}
-	playerDirectionRadian = angle * PI / 180;
+	playerDirectionRadian = angle * PI / 180.0f;
 }
 
 void Player::rotateRight()
 {
-	int angle = (int)((double)playerDirectionRadian * 180 / PI);
+	float angle = (float)((double)playerDirectionRadian * 180.0f / PI);
 	angle -= ROTATION_SPEED;
 	if (angle <= 360)
 	{
-		angle += 360;
+		angle += 360.0f;
 	}
-	playerDirectionRadian = angle * PI / 180;
+	playerDirectionRadian = angle * PI / 180.0f;
 }

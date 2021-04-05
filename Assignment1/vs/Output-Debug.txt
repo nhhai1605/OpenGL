@@ -14,37 +14,31 @@
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msvcp_win.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ucrtbase.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\combase.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\bcryptprimitives.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\glu32.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msvcp140d.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\freeglut.dll'. Module was built without symbols.
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winmm.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\vcruntime140d.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\vcruntime140_1d.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ucrtbased.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winmm.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winmmbase.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cfgmgr32.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\DXCore.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\imm32.dll'. 
-The thread 0x3304 has exited with code 0 (0x0).
+The thread 0x5da0 has exited with code 0 (0x0).
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\uxtheme.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msctf.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\oleaut32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\kernel.appcore.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\bcryptprimitives.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\clbcatq.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\AppXDeploymentClient.dll'. 
+'Assignment164dbg.exe' (Win32): Unloaded 'C:\Windows\System32\AppXDeploymentClient.dll'
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_a51067c0ac557884\nvoglv64.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\shell32.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\SHCore.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\windows.storage.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\profapi.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\powrprof.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\umpdc.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\shlwapi.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\kernel.appcore.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cryptsp.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\setupapi.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cfgmgr32.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\bcrypt.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ole32.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wtsapi32.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\version.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wtsapi32.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msasn1.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\cryptnet.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\crypt32.dll'. 
@@ -52,28 +46,198 @@ The thread 0x3304 has exited with code 0 (0x0).
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\devobj.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wintrust.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ntmarta.dll'. 
-The thread 0x27b0 has exited with code 0 (0x0).
-The thread 0x5328 has exited with code 0 (0x0).
-The thread 0x4e08 has exited with code 0 (0x0).
+The thread 0x331c has exited with code 0 (0x0).
+The thread 0x2388 has exited with code 0 (0x0).
+The thread 0x2fa4 has exited with code 0 (0x0).
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\windows.storage.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wldp.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\SHCore.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\shlwapi.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\DXCore.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\nvspcap64.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\profapi.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\dwmapi.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\TextInputFramework.dll'. 
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\CoreMessaging.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\CoreUIComponents.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\CoreMessaging.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ws2_32.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\WinTypes.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\WinTypes.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\WinTypes.dll'. 
 'Assignment164dbg.exe' (Win32): Unloaded 'C:\Windows\System32\WinTypes.dll'
 'Assignment164dbg.exe' (Win32): Unloaded 'C:\Windows\System32\WinTypes.dll'
-'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\iertutil.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\powrprof.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\umpdc.dll'. 
 'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winsta.dll'. 
-The thread 0x41e8 has exited with code 0 (0x0).
-The thread 0x5470 has exited with code 0 (0x0).
-The thread 0x2c5c has exited with code 0 (0x0).
-The thread 0x2f50 has exited with code 0 (0x0).
-The thread 0x450 has exited with code 0 (0x0).
-The thread 0x1114 has exited with code 0 (0x0).
-The thread 0x2320 has exited with code 0 (0x0).
-The thread 0x4da4 has exited with code 0 (0x0).
-The thread 0x1bec has exited with code 0 (0x0).
-The program '[10676] Assignment164dbg.exe' has exited with code 0 (0x0).
+The thread 0x2aac has exited with code 0 (0x0).
+The thread 0x5128 has exited with code 0 (0x0).
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\winmmbase.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\MMDevAPI.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\wdmaud.drv'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\ksuser.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\avrt.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\AudioSes.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msacm32.drv'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\msacm32.dll'. 
+'Assignment164dbg.exe' (Win32): Loaded 'C:\Windows\System32\midimap.dll'. 
+The thread 0x55fc has exited with code 0 (0x0).
+The thread 0x5c9c has exited with code 0 (0x0).
+The thread 0x2880 has exited with code 0 (0x0).
+The thread 0x5dd0 has exited with code 0 (0x0).
+The thread 0x31e0 has exited with code 0 (0x0).
+The thread 0x5c1c has exited with code 0 (0x0).
+The thread 0x4b4c has exited with code 0 (0x0).
+The thread 0x4dac has exited with code 0 (0x0).
+The thread 0x468 has exited with code 0 (0x0).
+The thread 0x3430 has exited with code 0 (0x0).
+The thread 0x349c has exited with code 0 (0x0).
+The thread 0x5a38 has exited with code 0 (0x0).
+The thread 0x2ee4 has exited with code 0 (0x0).
+The thread 0x3968 has exited with code 0 (0x0).
+The thread 0xaf0 has exited with code 0 (0x0).
+The thread 0x4ed8 has exited with code 0 (0x0).
+The thread 0x257c has exited with code 0 (0x0).
+The thread 0x562c has exited with code 0 (0x0).
+The thread 0x2150 has exited with code 0 (0x0).
+The thread 0x5dfc has exited with code 0 (0x0).
+The thread 0x54a0 has exited with code 0 (0x0).
+The thread 0x4ee0 has exited with code 0 (0x0).
+The thread 0x230c has exited with code 0 (0x0).
+The thread 0x49a0 has exited with code 0 (0x0).
+The thread 0x4f58 has exited with code 0 (0x0).
+The thread 0x2bbc has exited with code 0 (0x0).
+The thread 0x4d3c has exited with code 0 (0x0).
+The thread 0x2024 has exited with code 0 (0x0).
+The thread 0x33f8 has exited with code 0 (0x0).
+The thread 0x5cc4 has exited with code 0 (0x0).
+The thread 0x5848 has exited with code 0 (0x0).
+The thread 0x8d4 has exited with code 0 (0x0).
+The thread 0x4698 has exited with code 0 (0x0).
+The thread 0x2d68 has exited with code 0 (0x0).
+The thread 0x549c has exited with code 0 (0x0).
+The thread 0x138c has exited with code 0 (0x0).
+The thread 0x596c has exited with code 0 (0x0).
+The thread 0x17fc has exited with code 0 (0x0).
+The thread 0x1804 has exited with code 0 (0x0).
+The thread 0x5eac has exited with code 0 (0x0).
+The thread 0x880 has exited with code 0 (0x0).
+The thread 0x4478 has exited with code 0 (0x0).
+The thread 0x5334 has exited with code 0 (0x0).
+The thread 0x44f8 has exited with code 0 (0x0).
+The thread 0x3cf0 has exited with code 0 (0x0).
+The thread 0x5668 has exited with code 0 (0x0).
+The thread 0x1dc8 has exited with code 0 (0x0).
+The thread 0x55a8 has exited with code 0 (0x0).
+The thread 0x2854 has exited with code 0 (0x0).
+The thread 0x5260 has exited with code 0 (0x0).
+The thread 0x2228 has exited with code 0 (0x0).
+The thread 0x4650 has exited with code 0 (0x0).
+The thread 0x5048 has exited with code 0 (0x0).
+The thread 0x5b8c has exited with code 0 (0x0).
+The thread 0x5fec has exited with code 0 (0x0).
+The thread 0x188c has exited with code 0 (0x0).
+The thread 0xa54 has exited with code 0 (0x0).
+The thread 0x2574 has exited with code 0 (0x0).
+The thread 0x5c30 has exited with code 0 (0x0).
+The thread 0x4a18 has exited with code 0 (0x0).
+The thread 0x17c8 has exited with code 0 (0x0).
+The thread 0x3fa4 has exited with code 0 (0x0).
+The thread 0x4d6c has exited with code 0 (0x0).
+The thread 0x2144 has exited with code 0 (0x0).
+The thread 0x5dc0 has exited with code 0 (0x0).
+The thread 0x1d5c has exited with code 0 (0x0).
+The thread 0x50ac has exited with code 0 (0x0).
+The thread 0x5c54 has exited with code 0 (0x0).
+The thread 0x2c10 has exited with code 0 (0x0).
+The thread 0x3cb4 has exited with code 0 (0x0).
+The thread 0x3598 has exited with code 0 (0x0).
+The thread 0x3dac has exited with code 0 (0x0).
+The thread 0xb60 has exited with code 0 (0x0).
+The thread 0x1670 has exited with code 0 (0x0).
+The thread 0x31d0 has exited with code 0 (0x0).
+The thread 0x5708 has exited with code 0 (0x0).
+The thread 0x3efc has exited with code 0 (0x0).
+The thread 0x2884 has exited with code 0 (0x0).
+The thread 0x2f78 has exited with code 0 (0x0).
+The thread 0x59b4 has exited with code 0 (0x0).
+The thread 0xe4c has exited with code 0 (0x0).
+The thread 0x5110 has exited with code 0 (0x0).
+The thread 0x3198 has exited with code 0 (0x0).
+The thread 0x5f04 has exited with code 0 (0x0).
+The thread 0x3bac has exited with code 0 (0x0).
+The thread 0x576c has exited with code 0 (0x0).
+The thread 0x5a84 has exited with code 0 (0x0).
+The thread 0x5630 has exited with code 0 (0x0).
+The thread 0x5bc8 has exited with code 0 (0x0).
+The thread 0x3c3c has exited with code 0 (0x0).
+The thread 0x5dd4 has exited with code 0 (0x0).
+The thread 0x45f0 has exited with code 0 (0x0).
+The thread 0x3914 has exited with code 0 (0x0).
+The thread 0x1848 has exited with code 0 (0x0).
+The thread 0x2ef8 has exited with code 0 (0x0).
+The thread 0x1504 has exited with code 0 (0x0).
+The thread 0x3e58 has exited with code 0 (0x0).
+The thread 0x2028 has exited with code 0 (0x0).
+The thread 0x25c0 has exited with code 0 (0x0).
+The thread 0x1f98 has exited with code 0 (0x0).
+The thread 0x2c34 has exited with code 0 (0x0).
+The thread 0x4c2c has exited with code 0 (0x0).
+The thread 0x5570 has exited with code 0 (0x0).
+The thread 0x53b8 has exited with code 0 (0x0).
+The thread 0x3344 has exited with code 0 (0x0).
+The thread 0x1e38 has exited with code 0 (0x0).
+The thread 0x2774 has exited with code 0 (0x0).
+The thread 0x5af8 has exited with code 0 (0x0).
+The thread 0x5518 has exited with code 0 (0x0).
+The thread 0x298 has exited with code 0 (0x0).
+The thread 0x34d0 has exited with code 0 (0x0).
+The thread 0x26ac has exited with code 0 (0x0).
+The thread 0x3434 has exited with code 0 (0x0).
+The thread 0x5914 has exited with code 0 (0x0).
+The thread 0x1180 has exited with code 0 (0x0).
+The thread 0x35fc has exited with code 0 (0x0).
+The thread 0x566c has exited with code 0 (0x0).
+The thread 0x58a8 has exited with code 0 (0x0).
+The thread 0x2960 has exited with code 0 (0x0).
+The thread 0x546c has exited with code 0 (0x0).
+The thread 0x4a34 has exited with code 0 (0x0).
+The thread 0x3408 has exited with code 0 (0x0).
+The thread 0x57c4 has exited with code 0 (0x0).
+The thread 0x2920 has exited with code 0 (0x0).
+The thread 0x56dc has exited with code 0 (0x0).
+The thread 0x3454 has exited with code 0 (0x0).
+The thread 0x512c has exited with code 0 (0x0).
+The thread 0x32ec has exited with code 0 (0x0).
+The thread 0x5088 has exited with code 0 (0x0).
+The thread 0x15d4 has exited with code 0 (0x0).
+The thread 0x5104 has exited with code 0 (0x0).
+The thread 0x5464 has exited with code 0 (0x0).
+The thread 0x2980 has exited with code 0 (0x0).
+The thread 0xabc has exited with code 0 (0x0).
+The thread 0x5db0 has exited with code 0 (0x0).
+The thread 0x5478 has exited with code 0 (0x0).
+The thread 0x45a8 has exited with code 0 (0x0).
+The thread 0x5d58 has exited with code 0 (0x0).
+The thread 0x4cac has exited with code 0 (0x0).
+The thread 0x5f64 has exited with code 0 (0x0).
+The thread 0x5604 has exited with code 0 (0x0).
+The thread 0x50b4 has exited with code 0 (0x0).
+The thread 0x66c has exited with code 0 (0x0).
+The thread 0x5f9c has exited with code 0 (0x0).
+The thread 0x2014 has exited with code 0 (0x0).
+The thread 0x5e40 has exited with code 0 (0x0).
+The thread 0x1b54 has exited with code 0 (0x0).
+The thread 0x4a6c has exited with code 0 (0x0).
+The thread 0x5d64 has exited with code 0 (0x0).
+The thread 0x5694 has exited with code 0 (0x0).
+The thread 0x5edc has exited with code 0 (0x0).
+The thread 0x4160 has exited with code 0 (0x0).
+The thread 0x16ec has exited with code 0 (0x0).
+The thread 0x347c has exited with code 0 (0x0).
+The thread 0x5b20 has exited with code 0 (0x0).
+The thread 0x24c4 has exited with code 0 (0x0).
+The thread 0x304c has exited with code 0 (0x0).
+The thread 0x1fa0 has exited with code 0 (0x0).
+The thread 0x4790 has exited with code 0 (0x0).
+The thread 0x5cbc has exited with code 0 (0x0).
+The program '[23040] Assignment164dbg.exe' has exited with code 0 (0x0).

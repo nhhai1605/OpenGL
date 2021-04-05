@@ -45,9 +45,4 @@
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="guide.html">
-      <Filter>src</Filter>
-    </None>
-  </ItemGroup>
 </Project>

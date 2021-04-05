@@ -27,7 +27,7 @@ Particle::Particle(float posX, float posY, float radius, float radian, float col
 	this->velocityX = 0.0f;
 	this->velocityY = 0.0f;
 	this->particleDirectionRadian = radian;
-	this->radius = rand() % (int)radius;
+	this->radius = (float)(rand() % (int)radius);
 	this->color[0] = color[0] + (rand() % 3 - 1) * 0.1f;
 	this->color[1] = color[1] + (rand() % 3 - 1) * 0.1f;
 	this->color[2] = color[2] + (rand() % 3 - 1) * 0.1f;
@@ -35,7 +35,6 @@ Particle::Particle(float posX, float posY, float radius, float radian, float col
 
 Particle::~Particle()
 {
-	std::cout << "deleted" << std::endl;
 }
 
 
@@ -50,8 +49,8 @@ void Particle::move()
 	{
 		if (radius <= 0)
 		{
-			velocityX = 0;
-			velocityY = 0;
+			velocityX = 0.01f;
+			velocityY = 0.01f;
 		}
 		else
 		{

@@ -1,10 +1,28 @@
-#ifndef UTILITY
+//this file is used to contain all the variable that can be adjusted
+//some variables that are required to be adjustable in the specs is in the main.cpp
+//so that you can change it easier
+#ifndef UTILITY 
 #define UTILITY
 #include <math.h>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <random>
+#if _WIN32
+#   include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
+#if __APPLE__
+#   include <OpenGL/gl.h>
+#   include <OpenGL/glu.h>
+#   include <GLUT/glut.h>
+#else
+#   include <GL/gl.h>
+#   include <GL/glu.h>
+#   include <GL/glut.h>
+#endif
 #define PLAYER_SIZE 25.0f
 #define MAX_SPEED 30.0f
 #define ROTATION_SPEED 5.0f
@@ -31,5 +49,6 @@
 #define BL_MASS 1000.0f
 enum class WallWarning { N, E, S, W };
 enum class KeyState { FREE, PRESSED };
-enum class AsteroidState { SPLITED, NOTSPLITED };
+enum class AsteroidState { SPLITTABLE, UNSPLITTABLE };
+
 #endif // UTILITY

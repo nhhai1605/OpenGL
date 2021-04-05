@@ -31,15 +31,15 @@ Asteroid::Asteroid(float posX, float posY, float radius, float playerX, float pl
 			this->asteroidDirectionRadian = PI + asin(abs(posX - playerX) / distance);
 		}
 	}
-	this->asteroidSpeed = rand() % ASTEROID_SPEED + 250;
+	this->asteroidSpeed = (float)(rand() % ASTEROID_SPEED + 250);
 	this->velocityX = 0.0f;
 	this->velocityY = 0.0f;
 	this->vertices = rand() % 10 + 5;
-	this->rotateSpeed = rand() % 6 - 3;
+	this->rotateSpeed = (float)(rand() % 6 - 3);
 	this->asteroidRotateRadian = 0.0f;
  	for (int i = 0; i < vertices; i++)
 	{
-		offsets.push_back(rand() % 4 + 7);
+		offsets.push_back((float)(rand() % 4 + 7));
 	}
 }
 
@@ -55,7 +55,7 @@ void Asteroid::setAsteroidPos(float x, float y)
 
 void Asteroid::rotate()
 {
-	float angle = (double)asteroidRotateRadian * 180 / PI;
+	float angle = (float)(asteroidRotateRadian * 180 / PI);
 	angle += rotateSpeed;
 	if ((int)angle % 360 == 0)
 	{
