@@ -21,7 +21,7 @@
 #define BH_SPIRAL true
 
 //true to set the arena size as the screen size
-#define ARENA_FIT_SCREEN false
+#define ARENA_FIT_SCREEN true
 float arenaWidth = 1920 / 2, arenaHeight = 1080 / 2; //if false, you can set the arena width and height here
 float wallWidth, wallHeight; //the size of the wall, different from the arena size (the wall size might be equal to the screen size, but the arena size is different) 
 float ratioX = 0.0f, ratioY = 0.0f; //ratio of arena size to screen size
@@ -120,7 +120,7 @@ void restartGame()
 void drawBlackHole(float posX, float posY)
 {
 	glColor3f(bh_color[0], bh_color[1], bh_color[2]);
-	glPointSize(10.0f * scale);
+	glPointSize(5.0f * scale);
 	float radius = BLACK_HOLE_RADIUS * scale;
 	glBegin(GL_POINTS);
 	for (float i = -radius; i <= radius; i += 0.01f)
@@ -1000,7 +1000,7 @@ void asteroidSpawnAndMovement(float dt)
 	{
 		if (asteroids[j]->hp <= 0) //the asteroid only destroyed when its hp below 0
 		{
-			player->score += asteroids[j]->radius / scale; //increase the score of the player by the radius of asteroid
+			player->score += (int)(asteroids[j]->radius / scale); //increase the score of the player by the radius of asteroid
 			player->asteroidsDestroyed++;
 
 			if (asteroids[j]->state == AsteroidState::SPLITTABLE) //asteroid can only be splitted once, so is this used to check if the asteroid is splittable
