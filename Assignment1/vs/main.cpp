@@ -6,7 +6,7 @@
 #include "Explosion.h"
 
 //true for seeing the objects' hitbox
-#define SHOW_HITBOX true
+#define SHOW_HITBOX false
 
 //false to activate the "touch wall then die" mode
 #define GO_THROUGH_WALL false
@@ -18,13 +18,17 @@
 #define SHOW_FPS true
 
 // false for the simple pulse mode and false for spiral mode
-#define BH_SPIRAL false
+#define BH_SPIRAL true
 
-//true to let the arena fit the screen, fasle to set it manually
-#define ARENA_FIT_SCREEN true
-float arenaWidth = 800, arenaHeight = 400; //if false, you can set the arena width and height here
+//true to set the arena size as the screen size
+#define ARENA_FIT_SCREEN false
+float arenaWidth = 1920 / 2, arenaHeight = 1080 / 2; //if false, you can set the arena width and height here
+float wallWidth, wallHeight; //the size of the wall, different from the arena size (the wall size might be equal to the screen size, but the arena size is different) 
+float ratioX = 0.0f, ratioY = 0.0f; //ratio of arena size to screen size
+float scale = 0.0f; //scale are base on larger ratio to scale the size of the objects
+
 //Arena color
-float arena_color[] = { 0.0f, 0.0f, 0.0f };
+float arena_color[] = { 1.0f, 1.0f, 1.0f };
 
 //Player color
 float player_outline_color[] = { 1.0, 0.0, 0.0 }; //player outline color
@@ -53,7 +57,7 @@ float blackHoleX = 0.0f, blackHoleY = 0.0f; //BH position, which are initialized
 float bh_color[] = { 0.5f, 0.2f, 0.5f };
 float bh_dt = 0.0f;
 float blackHolePullingRate = 2.5f; //this variable is used to make the object smaller when being pulled by the BH
-float blackHoleFrequency = 5000.0f; // this is the frequency of the BH, e.g. 5s off then 5s on
+float blackHoleFrequency = 3000.0f; // this is the frequency of the BH, e.g. 5s off then 5s on
 bool blackHoleActivated = false; //this is to keep track of the BH state
 //These 2 variables are used for the pulse mode (the circle going inward)
 float pulseSpeed = 2.5f;
@@ -83,7 +87,6 @@ bool isThrusting = false;
 bool FPSupdatable = true;
 bool gameStarted = false;
 bool playerDied = false;
-
 float time_since_game_start = 0.0f; // this is used to calculate time in game
 
 //these are used to calculate and displaying the blinking and invulnerable time after you die
@@ -117,12 +120,13 @@ void restartGame()
 void drawBlackHole(float posX, float posY)
 {
 	glColor3f(bh_color[0], bh_color[1], bh_color[2]);
-	glPointSize(5.0f);
+	glPointSize(10.0f * scale);
+	float radius = BLACK_HOLE_RADIUS * scale;
 	glBegin(GL_POINTS);
-	for (float i = -BLACK_HOLE_RADIUS; i <= BLACK_HOLE_RADIUS; i += 0.1f)
+	for (float i = -radius; i <= radius; i += 0.01f)
 	{
 		float circleX = i;
-		float circleY = sqrt(BLACK_HOLE_RADIUS * BLACK_HOLE_RADIUS - circleX * circleX);
+		float circleY = sqrt(radius * radius - circleX * circleX);
 		glVertex3f(circleX + posX, posY + circleY, -0.5);
 		glVertex3f(circleX + posX, posY - circleY, -0.5);
 	}
@@ -138,20 +142,20 @@ void drawBlackHole(float posX, float posY)
 			{
 				float angle = 0.1f * i;
 				float r = (float)(glutGet(GLUT_ELAPSED_TIME) / 40.0f);
-				float x = (space * angle) * cos(angle - r);
-				float y = (space * angle) * sin(angle - r);
+				float x = (space * scale * angle) * cos(angle - r);
+				float y = (space * scale * angle) * sin(angle - r);
 				glVertex3f(x + posX, posY + y, -0.5);
 			}
 			glEnd();
 		}
 		else
 		{
-			pulseVel += pulseSpeed;
+			pulseVel += pulseSpeed * scale;
 			glBegin(GL_POINTS);
-			float newR = BLACK_HOLE_RADIUS - pulseVel;
-			for (float j = 0.0f; BLACK_HOLE_RADIUS - pulseVel + j <= BLACK_HOLE_RADIUS; j += pulseSpeed * 10)
+			float newR = radius - pulseVel;
+			for (float j = 0.0f; radius - pulseVel + j <= radius; j += pulseSpeed * 10)
 			{
-				newR = BLACK_HOLE_RADIUS - pulseVel + j;
+				newR = radius - pulseVel + j;
 				for (float i = -newR; i <= newR; i += 0.1f)
 				{
 					float circleX = i;
@@ -167,9 +171,41 @@ void drawBlackHole(float posX, float posY)
 }
 
 ///this function is used to draw an arena, including changing color of the wall when player is near
-void drawArena(float arenaWidth, float arenaHeight)
+void drawArena(float width, float height)
 {
-	glLineWidth(5.0f); 
+	wallWidth = width;
+	wallHeight = height;
+	glLineWidth(5.0f);
+
+	//drawing the cover , to hide the asteroids when they spawning outside the arena
+	glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_QUADS);
+	if (wallWidth == screenWidth)
+	{
+		glVertex3f(0.0f, screenHeight, 1.0f);
+		glVertex3f(screenWidth, screenHeight, 1.0f);
+		glVertex3f(screenWidth, screenHeight - (screenHeight - wallHeight) / 2, 1.0f);
+		glVertex3f(0.0f, screenHeight - (screenHeight - wallHeight) / 2, 1.0f);
+
+		glVertex3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(screenWidth, 0.0f, 1.0f);
+		glVertex3f(screenWidth, (screenHeight - wallHeight) / 2, 1.0f);
+		glVertex3f(0.0f, (screenHeight - wallHeight) / 2, 1.0f);
+	}
+	else if (wallHeight == screenHeight)
+	{
+		glVertex3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(0.0f, screenHeight, 1.0f);
+		glVertex3f((screenWidth - wallWidth) / 2, screenHeight, 1.0f);
+		glVertex3f((screenWidth - wallWidth) / 2, 0.0f, 1.0f);
+
+		glVertex3f(screenWidth, 0.0f, 1.0f);
+		glVertex3f(screenWidth, screenHeight, 1.0f);
+		glVertex3f(screenWidth - (screenWidth - wallWidth) / 2, screenHeight, 1.0f);
+		glVertex3f(screenWidth - (screenWidth - wallWidth) / 2, 0.0f, 1.0f);
+	}
+	glVertex3f(0.0f, 0.0f, 1.0f);
+	glEnd();
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_LINES);
 	boolean w = false, s = false, n = false, e = false;
@@ -196,30 +232,30 @@ void drawArena(float arenaWidth, float arenaHeight)
 	{
 		glColor3f(warning_color[0], warning_color[1], warning_color[2]);
 	}
-	float leftCornerX = (float)((screenWidth - arenaWidth) / 2);
-	float leftCornerY = (float)((screenHeight - arenaHeight) / 2);
+	float leftCornerX = (float)((screenWidth - width) / 2);
+	float leftCornerY = (float)((screenHeight - height) / 2);
 	glVertex3f(leftCornerX, leftCornerY, 0.0);
-	glVertex3f(leftCornerX, leftCornerY + arenaHeight, 0.0);
+	glVertex3f(leftCornerX, leftCornerY + height, 0.0);
 	glColor3f(1.0, 1.0, 1.0);
 	if (n)
 	{
 		glColor3f(warning_color[0], warning_color[1], warning_color[2]);
 	}
-	glVertex3f(leftCornerX, leftCornerY + arenaHeight, 0.0);
-	glVertex3f(leftCornerX + arenaWidth, leftCornerY + arenaHeight, 0.0);
+	glVertex3f(leftCornerX, leftCornerY + height, 0.0);
+	glVertex3f(leftCornerX + width, leftCornerY + height, 0.0);
 	glColor3f(1.0, 1.0, 1.0);
 	if (e)
 	{
 		glColor3f(warning_color[0], warning_color[1], warning_color[2]);
 	}
-	glVertex3f(leftCornerX + arenaWidth, leftCornerY + arenaHeight, 0.0);
-	glVertex3f(leftCornerX + arenaWidth, leftCornerY, 0.0);
+	glVertex3f(leftCornerX + width, leftCornerY + height, 0.0);
+	glVertex3f(leftCornerX + width, leftCornerY, 0.0);
 	glColor3f(1.0, 1.0, 1.0);
 	if (s)
 	{
 		glColor3f(warning_color[0], warning_color[1], warning_color[2]);
 	}
-	glVertex3f(leftCornerX + arenaWidth, leftCornerY, 0.0);
+	glVertex3f(leftCornerX + width, leftCornerY, 0.0);
 	glVertex3f(leftCornerX, leftCornerY, 0.0);
 	glColor3f(1.0, 1.0, 1.0);
 	glEnd();
@@ -238,7 +274,7 @@ void drawPlayerInfo(Player * player)
 	glColor3f(1.0, 1.0, 1.0);
 
 	std::string live = "Life: " + std::to_string(player->life);
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (live.size() - 3), (screenHeight - arenaHeight) / 2 + arenaHeight - 25);
+	glRasterPos2f(screenWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (live.size() - 3), (screenHeight - wallHeight) / 2 + wallHeight - 25);
 	for (std::string::iterator i = live.begin(); i != live.end(); ++i)
 	{
 		char c = *i;
@@ -246,7 +282,7 @@ void drawPlayerInfo(Player * player)
 	}
 
 	std::string score = "Score: " + std::to_string(player->score);\
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + 10, (screenHeight - arenaHeight) / 2 + arenaHeight - 25);
+	glRasterPos2f((screenWidth - wallWidth) / 2 + 10, (screenHeight - wallHeight) / 2 + wallHeight - 25);
 	for (std::string::iterator i = score.begin(); i != score.end(); ++i)
 	{
 		char c = *i;
@@ -254,7 +290,7 @@ void drawPlayerInfo(Player * player)
 	}
 
 	std::string asteroidsDestroyed = "Destroyed: " + std::to_string(player->asteroidsDestroyed);
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (asteroidsDestroyed.size() + 1), (screenHeight - arenaHeight) / 2 + arenaHeight - 25);
+	glRasterPos2f((screenWidth - wallWidth) / 2 + wallWidth - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (asteroidsDestroyed.size() + 1), (screenHeight - wallHeight) / 2 + wallHeight - 25);
 	for (std::string::iterator i = asteroidsDestroyed.begin(); i != asteroidsDestroyed.end(); ++i)
 	{
 		char c = *i;
@@ -265,7 +301,7 @@ void drawPlayerInfo(Player * player)
 	int minutes = (int)floor(t / 60000);
 	int seconds = (int)floor((t - minutes * 60000) / 1000);
 	std::string time = "Time: " + std::to_string(minutes) + ":" + std::to_string(seconds);
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth + 10 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (time.size() + 2), (screenHeight - arenaHeight) / 2 + 10);
+	glRasterPos2f((screenWidth - wallWidth) / 2 + wallWidth + 10 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (time.size() + 2), (screenHeight - wallHeight) / 2 + 10);
 	for (std::string::iterator i = time.begin(); i != time.end(); ++i)
 	{
 		char c = *i;
@@ -273,7 +309,7 @@ void drawPlayerInfo(Player * player)
 	}
 
 	std::string round = "Round: " + std::to_string(currRound);
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (round.size() - 3), (screenHeight - arenaHeight) / 2 + 10);
+	glRasterPos2f((screenWidth - wallWidth) / 2 + wallWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (round.size() - 3), (screenHeight - wallHeight) / 2 + 10);
 	for (std::string::iterator i = round.begin(); i != round.end(); ++i)
 	{
 		char c = *i;
@@ -297,7 +333,7 @@ void drawFPS(std::string fps)
 	glPushMatrix();
 	glLoadIdentity();
 	glColor3f(1.0, 1.0, 1.0);
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + 10, (screenHeight - arenaHeight) / 2 + 10);
+	glRasterPos2f((screenWidth - wallWidth) / 2 + 10, (screenHeight - wallHeight) / 2 + 10);
 	fps = "FPS: " + fps;
 	for (std::string::iterator i = fps.begin(); i != fps.end(); ++i)
 	{
@@ -338,7 +374,7 @@ void drawPlayer(Player * player)
 		}
 		else
 		{
-			glColor3f(arena_color[0], arena_color[1], arena_color[2]);
+			glColor3f(0.0f, 0.0f, 0.0f);
 		}
 		//draw the ship
 		glBegin(GL_POLYGON);
@@ -354,7 +390,7 @@ void drawPlayer(Player * player)
 		}
 		else
 		{
-			glColor3f(arena_color[0], arena_color[1], arena_color[2]);
+			glColor3f(0.0f, 0.0f, 0.0f);
 		}
 		//draw the ship's outline
 		glLineWidth(player->playerSize / 6);
@@ -506,7 +542,7 @@ void drawStartMessage()
 	glLoadIdentity();
 	glColor3f(1.0, 1.0, 1.0);
 	std::string str = "Press any keys to start...";
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (str.size() / 2 - 2), (screenHeight - arenaHeight) / 2 + arenaHeight / 2);
+	glRasterPos2f(screenWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (str.size() / 2 - 2), screenHeight / 2);
 	for (std::string::iterator i = str.begin(); i != str.end(); ++i)
 	{
 		char c = *i;
@@ -530,7 +566,7 @@ void drawDieMessage()
 	glLoadIdentity();
 	glColor3f(1.0, 1.0, 1.0);
 	std::string str = "Game Over. Press any key to play again...";
-	glRasterPos2f((screenWidth - arenaWidth) / 2 + arenaWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (str.size() / 2 - 2), (screenHeight - arenaHeight) / 2 + arenaHeight / 2);
+	glRasterPos2f(screenWidth / 2 - glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24, 'a') * (str.size() / 2 - 2), screenHeight / 2);
 	for (std::string::iterator i = str.begin(); i != str.end(); ++i)
 	{
 		char c = *i;
@@ -546,9 +582,9 @@ void drawDieMessage()
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(arena_color[0], arena_color[1], arena_color[2], 0.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
-	drawArena(arenaWidth, arenaHeight);
+	drawArena(wallWidth, wallHeight);
 	if(SHOW_FPS) drawFPS(std::to_string(static_cast<int>(lastFPS)));
 	if (gameStarted)
 	{
@@ -705,13 +741,13 @@ void playerMovementAndParticles()
 	if (keyArray[int('w')] == KeyState::PRESSED)
 	{
 		//MAX_SPEED is to prevent the player going to fast
-		if (player->velocityX <= MAX_SPEED)
+		if (player->velocityX <= MAX_SPEED * scale)
 		{
-			player->velocityX -= player->thrustSpeed * sin(player->playerDirectionRadian) / currentFPS;
+			player->velocityX -= player->thrustSpeed * sin(player->playerDirectionRadian) / currentFPS * scale;
 		}
-		if (player->velocityY <= MAX_SPEED)
+		if (player->velocityY <= MAX_SPEED * scale)
 		{
-			player->velocityY += player->thrustSpeed * cos(player->playerDirectionRadian) / currentFPS;
+			player->velocityY += player->thrustSpeed * cos(player->playerDirectionRadian) / currentFPS * scale;
 		}
 		isThrusting = true; //this is used to determine when to draw the particles
 		//this is used to draw the particles coming out from the back of the ship
@@ -719,10 +755,10 @@ void playerMovementAndParticles()
 		{
 			if (particle_dt >= timeBetweenParticles) //this is to delaying the particle coming out
 			{
-				Particle* particle = new Particle(player, INIT_PARTICLE_SIZE, particle_color);
+				Particle* particle = new Particle(player, INIT_PARTICLE_SIZE * scale, particle_color);
 				particles.push_back(particle);
-				particle->velocityX = particleSpeed / currentFPS * -sin(particle->particleDirectionRadian);
-				particle->velocityY = particleSpeed / currentFPS * cos(particle->particleDirectionRadian);
+				particle->velocityX = particleSpeed / currentFPS * -sin(particle->particleDirectionRadian) * scale;
+				particle->velocityY = particleSpeed / currentFPS * cos(particle->particleDirectionRadian) * scale;
 				particle_dt -= timeBetweenParticles;
 			}
 			else
@@ -735,8 +771,8 @@ void playerMovementAndParticles()
 	{
 		isThrusting = false;
 		//if player release the 'w' key, the player will slow down by FRICTION
-		player->velocityX -= FRICTION * player->velocityX / currentFPS;
-		player->velocityY -= FRICTION * player->velocityY / currentFPS;
+		player->velocityX -= FRICTION * player->velocityX / currentFPS * scale;
+		player->velocityY -= FRICTION * player->velocityY / currentFPS * scale;
 	}
 	player->move(); //player move() function is used to add posX with velocityX as well as posY with velocityY
 
@@ -744,7 +780,7 @@ void playerMovementAndParticles()
 	for (int i = 0; i < particles.size(); i++)
 	{
 		particles[i]->move();
-		particles[i]->size -= dt * sizeReduceRate; //reduce the size base on the dt
+		particles[i]->size -= dt * sizeReduceRate * scale; //reduce the size base on the dt
 		if (particles[i]->size <= 0.0f) //when they are smaller than 0, removed it from the vector of particles
 		{
 			delete particles[i];
@@ -757,34 +793,34 @@ void playerMovementAndParticles()
 		//which mean player cannot die if touch the wall during the invulnerable time
 	{
 		//this is to draw the player at the opposite site of the wall when go through the wall
-		if (player->posX < ((screenWidth - arenaWidth) / 2 - player->playerSize) && player->velocityX < 0)
+		if (player->posX < ((screenWidth - wallWidth) / 2 - player->playerSize) && player->velocityX < 0)
 		{
-			player->posX = arenaWidth + (screenWidth - arenaWidth) / 2 + player->playerSize * 2;
+			player->posX = wallWidth + (screenWidth - wallWidth) / 2 + player->playerSize * 2;
 		}
-		else if (player->posX > (arenaWidth + (screenWidth - arenaWidth) / 2 + player->playerSize) && player->velocityX > 0)
+		else if (player->posX > (wallWidth + (screenWidth - wallWidth) / 2 + player->playerSize) && player->velocityX > 0)
 		{
-			player->posX = (screenWidth - arenaWidth) / 2 - player->playerSize * 2;
+			player->posX = (screenWidth - wallWidth) / 2 - player->playerSize * 2;
 		}
-		else if (player->posY < ((screenHeight - arenaHeight) / 2 - player->playerSize) && player->velocityY < 0)
+		else if (player->posY < ((screenHeight - wallHeight) / 2 - player->playerSize) && player->velocityY < 0)
 		{
-			player->posY = arenaHeight + (screenHeight - arenaHeight) / 2 + player->playerSize * 2;
+			player->posY = wallHeight + (screenHeight - wallHeight) / 2 + player->playerSize * 2;
 		}
-		else if (player->posY > (arenaHeight + (screenHeight - arenaHeight) / 2 + player->playerSize) && player->velocityY > 0)
+		else if (player->posY > (wallHeight + (screenHeight - wallHeight) / 2 + player->playerSize) && player->velocityY > 0)
 		{
-			player->posY = (screenHeight - arenaHeight) / 2 - player->playerSize * 2;
+			player->posY = (screenHeight - wallHeight) / 2 - player->playerSize * 2;
 		}
 	}
 	else
 	{
 		//this is used to check when player touch the wall 
-		if (player->posX < (screenWidth - arenaWidth) / 2
-			|| player->posX >  arenaWidth + (screenWidth - arenaWidth) / 2
-			|| player->posY < (screenHeight - arenaHeight) / 2
-			|| player->posY > arenaHeight + (screenHeight - arenaHeight) / 2)
+		if (player->posX < (screenWidth - wallWidth) / 2
+			|| player->posX >  wallWidth + (screenWidth - wallWidth) / 2
+			|| player->posY < (screenHeight - wallHeight) / 2
+			|| player->posY > wallHeight + (screenHeight - wallHeight) / 2)
 		{
 			if (!invulnerable_state)
 			{
-				explosions.push_back(new Explosion(player->posX, player->posY, player->playerSize * 2, explosion_color, explosionParticles, EXPLOSION_PARTICLE_SIZE));
+				explosions.push_back(new Explosion(player->posX, player->posY, player->playerSize, explosion_color, explosionParticles, EXPLOSION_PARTICLE_SIZE * scale, scale));
 				player->die();
 				invulnerable_state = true;
 			}
@@ -792,19 +828,19 @@ void playerMovementAndParticles()
 
 		warnings.clear(); //we want to clear the warnings vector everytime, so that the wall can be set back to WHITE when player is not near the wall
 		//I didnt use else here so that there can be multiple warnings at the same time
-		if (player->posX < (screenWidth - arenaWidth) / 2 + WARNING_DISTANCE)
+		if (player->posX < (screenWidth - wallWidth) / 2 + WARNING_DISTANCE * scale)
 		{
 			warnings.push_back(WallWarning::W);
 		}
-		if (player->posX > (arenaWidth + (screenWidth - arenaWidth) / 2 - WARNING_DISTANCE))
+		if (player->posX > (wallWidth + (screenWidth - wallWidth) / 2 - WARNING_DISTANCE * scale))
 		{
 			warnings.push_back(WallWarning::E);
 		}
-		if (player->posY < (screenHeight - arenaHeight) / 2 + WARNING_DISTANCE)
+		if (player->posY < (screenHeight - wallHeight) / 2 + WARNING_DISTANCE * scale)
 		{
 			warnings.push_back(WallWarning::S);
 		}
-		if (player->posY > (arenaHeight + (screenHeight - arenaHeight) / 2 - WARNING_DISTANCE))
+		if (player->posY > (wallHeight + (screenHeight - wallHeight) / 2 - WARNING_DISTANCE * scale))
 		{
 			warnings.push_back(WallWarning::N);
 		}
@@ -839,31 +875,31 @@ void asteroidSpawnAndMovement(float dt)
 	if (asteroid_spawn_delay >= asteroid_spawn_rate && asteroids_number > 0)
 	{
 		asteroids_number--;
-		int int_currentWidth = static_cast<int>(screenWidth);
-		int int_currentHeight = static_cast<int>(screenHeight);
 		int side = rand() % 2;
 		float asteroidX, asteroidY;
 		if (side == 0)
 		{
-			asteroidX = (float)(rand() % 100 + ((int_currentWidth - (int)arenaWidth) / 2 + arenaWidth + 100));
+			asteroidX = (float)(rand() % 100 + ((screenWidth - wallWidth) / 2 + wallWidth + 100));
 		}
 		else
 		{
-			asteroidX = (float)(rand() % 100 + ((int_currentWidth - (int)arenaWidth) / 2 - 200));
+			asteroidX = (float)(rand() % 100 + ((screenWidth - wallWidth) / 2 - 200));
 		}
 		side = rand() % 2;
 		if (side == 0)
 		{
-			asteroidY = (float)(rand() % 100 + ((int_currentHeight - (int)arenaHeight) / 2 + arenaHeight + 100));
+			asteroidY = (float)(rand() % 100 + ((screenHeight - wallHeight) / 2 + wallHeight + 100));
 		}
 		else
 		{
-			asteroidY = (float)(rand() % 100 + ((int_currentHeight - (int)arenaHeight) / 2 - 200));
+			asteroidY = (float)(rand() % 100 + ((screenHeight - wallHeight) / 2 - 200));
 		}
-		float asteroid_radius = (float)(rand() % 50 + 50);
+
+		float asteroid_radius = (float)(rand() % 50 + 50) * scale;
 		Asteroid* asteroid = new Asteroid(asteroidX, asteroidY, asteroid_radius, player->posX, player->posY, AsteroidState::SPLITTABLE);
-		asteroid->velocityX = asteroid->asteroidSpeed * -sin(asteroid->asteroidDirectionRadian) / currentFPS;
-		asteroid->velocityY = asteroid->asteroidSpeed * cos(asteroid->asteroidDirectionRadian) / currentFPS;
+		asteroid->velocityX = asteroid->asteroidSpeed * -sin(asteroid->asteroidDirectionRadian) / currentFPS * scale;
+		asteroid->velocityY = asteroid->asteroidSpeed * cos(asteroid->asteroidDirectionRadian) / currentFPS * scale;
+		asteroid->hp /= scale;
 		asteroids.push_back(asteroid);
 		asteroid_spawn_delay = 0.0;
 	}
@@ -879,19 +915,19 @@ void asteroidSpawnAndMovement(float dt)
 	for (auto& asteroid : asteroids)
 	{
 		//when touching the wall, just need to change the side of the velocity
-		if (asteroid->posX > arenaWidth + (screenWidth - arenaWidth) / 2 - asteroid->radius && asteroid->velocityX > 0)
+		if (asteroid->posX > wallWidth + (screenWidth - wallWidth) / 2 - asteroid->radius && asteroid->velocityX > 0)
 		{
 			asteroid->velocityX *= -1;
 		}
-		else if (asteroid->posX < (screenWidth - arenaWidth) / 2 + asteroid->radius && asteroid->velocityX < 0)
+		else if (asteroid->posX < (screenWidth - wallWidth) / 2 + asteroid->radius && asteroid->velocityX < 0)
 		{
 			asteroid->velocityX *= -1;
 		}
-		else if (asteroid->posY > arenaHeight + (screenHeight - arenaHeight) / 2 - asteroid->radius && asteroid->velocityY > 0)
+		else if (asteroid->posY > wallHeight + (screenHeight - wallHeight) / 2 - asteroid->radius && asteroid->velocityY > 0)
 		{
 			asteroid->velocityY *= -1;
 		}
-		else if (asteroid->posY < (screenHeight - arenaHeight) / 2 + asteroid->radius && asteroid->velocityY < 0)
+		else if (asteroid->posY < (screenHeight - wallHeight) / 2 + asteroid->radius && asteroid->velocityY < 0)
 		{
 			asteroid->velocityY *= -1;
 		}
@@ -929,17 +965,17 @@ void asteroidSpawnAndMovement(float dt)
 		asteroid->rotate();
 
 		//this is used to apply the friction onto the asteroid
-		asteroid->velocityX -= ASTEROID_FRICTION * asteroid->velocityX / currentFPS;
-		asteroid->velocityY -= ASTEROID_FRICTION * asteroid->velocityY / currentFPS;
+		asteroid->velocityX -= ASTEROID_FRICTION * asteroid->velocityX / currentFPS * scale;
+		asteroid->velocityY -= ASTEROID_FRICTION * asteroid->velocityY / currentFPS * scale;
 
 		//this is used to prevent the asteroid going crazy 
-		if (asteroid->velocityX > ASTEROID_MAX_VELOCITY)
+		if (asteroid->velocityX > ASTEROID_MAX_VELOCITY * scale)
 		{
-			asteroid->velocityX = ASTEROID_MAX_VELOCITY;
+			asteroid->velocityX = ASTEROID_MAX_VELOCITY * scale;
 		}
-		if (asteroid->velocityY > ASTEROID_MAX_VELOCITY)
+		if (asteroid->velocityY > ASTEROID_MAX_VELOCITY * scale)
 		{
-			asteroid->velocityY = ASTEROID_MAX_VELOCITY;
+			asteroid->velocityY = ASTEROID_MAX_VELOCITY * scale;
 		}
 		//add velocity to position
 		asteroid->move();
@@ -952,7 +988,7 @@ void asteroidSpawnAndMovement(float dt)
 		{
 			if (!invulnerable_state)
 			{
-				explosions.push_back(new Explosion(player->posX, player->posY, player->playerSize * 2, explosion_color, explosionParticles, EXPLOSION_PARTICLE_SIZE));
+				explosions.push_back(new Explosion(player->posX, player->posY, player->playerSize, explosion_color, explosionParticles, EXPLOSION_PARTICLE_SIZE * scale, scale));
 				player->die();
 				invulnerable_state = true;
 			}
@@ -964,7 +1000,7 @@ void asteroidSpawnAndMovement(float dt)
 	{
 		if (asteroids[j]->hp <= 0) //the asteroid only destroyed when its hp below 0
 		{
-			player->score += (int)asteroids[j]->radius; //increase the score of the player by the radius of asteroid
+			player->score += asteroids[j]->radius / scale; //increase the score of the player by the radius of asteroid
 			player->asteroidsDestroyed++;
 
 			if (asteroids[j]->state == AsteroidState::SPLITTABLE) //asteroid can only be splitted once, so is this used to check if the asteroid is splittable
@@ -989,7 +1025,7 @@ void asteroidSpawnAndMovement(float dt)
 				asteroids.push_back(a2);
 			}
 			//make an explosion at the big asteroid location
-			explosions.push_back(new Explosion(asteroids[j]->posX, asteroids[j]->posY, asteroids[j]->radius, explosion_color, explosionParticles, EXPLOSION_PARTICLE_SIZE));
+			explosions.push_back(new Explosion(asteroids[j]->posX, asteroids[j]->posY, asteroids[j]->radius, explosion_color, explosionParticles, EXPLOSION_PARTICLE_SIZE * scale, scale));
 			delete asteroids[j];
 			asteroids.erase(asteroids.begin() + j);
 			break;
@@ -1018,19 +1054,19 @@ void bulletSpawnAndMovement(float dt)
 		float posY = player->posY;
 		posX += -size * 1.5f * sin(radian);
 		posY += size * 1.5f * cos(radian);
-		Bullet* bullet = new Bullet(posX, posY, radian, BULLET_SIZE);
-		bullet->velocityX = -sin(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS;
-		bullet->velocityY = cos(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS;
+		Bullet* bullet = new Bullet(posX, posY, radian, BULLET_SIZE * scale);
+		bullet->velocityX = -sin(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS * scale;
+		bullet->velocityY = cos(bullet->bulletDirectionRadian) * BULLET_SPEED / currentFPS * scale;
 		bullets.push_back(bullet);
 	}
 
 	//delete the bullet that are out of the wall
 	for (int i = 0; i < bullets.size(); i++)
 	{
-		if (bullets[i]->posX > arenaWidth + (screenWidth - arenaWidth) / 2
-			|| bullets[i]->posX < (screenWidth - arenaWidth) / 2
-			|| bullets[i]->posY >  arenaHeight + (screenHeight - arenaHeight) / 2
-			|| bullets[i]->posY < (screenHeight - arenaHeight) / 2)
+		if (bullets[i]->posX > wallWidth + (screenWidth - wallWidth) / 2
+			|| bullets[i]->posX < (screenWidth - wallWidth) / 2
+			|| bullets[i]->posY >  wallHeight + (screenHeight - wallHeight) / 2
+			|| bullets[i]->posY < (screenHeight - wallHeight) / 2)
 		{
 			delete bullets[i];
 			bullets.erase(bullets.begin() + i);
@@ -1044,7 +1080,7 @@ void bulletSpawnAndMovement(float dt)
 		bullets[i]->move();
 		for (auto& asteroid : asteroids)
 		{
-			if (distance(bullets[i]->posX, bullets[i]->posY, asteroid->posX, asteroid->posY) <= (asteroid->radius + BULLET_SIZE))
+			if (distance(bullets[i]->posX, bullets[i]->posY, asteroid->posX, asteroid->posY) <= (asteroid->radius + bullets[i]->size))
 			{
 				asteroid->getHit();
 				//asteroid only get hit and lose hp here, asteroid will be deleted when its hp is 0
@@ -1064,7 +1100,7 @@ void explosionEffect(float dt)
 		for (int j = 0; j < explosions[i]->particles.size(); j++)
 		{
 			explosions[i]->particles[j]->move();
-			explosions[i]->particles[j]->size -= dt * explosions[i]->sizeReduceRate; //make the particle smaller with dt
+			explosions[i]->particles[j]->size -= dt * explosions[i]->sizeReduceRate * scale; //make the particle smaller with dt
 			if (explosions[i]->particles[j]->size <= 0.0) //if the particle is smaller than 0, it will be deleted
 			{
 				delete explosions[i]->particles[j];
@@ -1086,31 +1122,34 @@ void blackHolePulling(float dt)
 {
 	if (blackHoleActivated) //check if the black hole is activated or on cooldown
 	{
+		float radius = BLACK_HOLE_RADIUS * scale;
 		//change the movement of the bullet 
 		for (int i = 0; i < bullets.size(); i++)
 		{
-			if (distance(bullets[i]->posX, bullets[i]->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS)
+			if (distance(bullets[i]->posX, bullets[i]->posY, blackHoleX, blackHoleY) <= radius)
 			{
 				float forceX = blackHoleX - bullets[i]->posX;
 				float forceY = blackHoleY - bullets[i]->posY;
-				float r = sqrt(forceX * forceX + forceY * forceY);
+				float r = sqrt(forceX * forceX + forceY * forceY) / scale;
 				//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
 				float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
-				forceX *= fg / r;
+				forceX *= fg / r ;
 				forceY *= fg / r;
-				bullets[i]->velocityX += forceX;
+				bullets[i]->velocityX += forceX ;
 				bullets[i]->velocityY += forceY;
-				float r2 = sqrt(bullets[i]->velocityX * bullets[i]->velocityX + bullets[i]->velocityY * bullets[i]->velocityY);
-				bullets[i]->velocityX *= 3.0f / r2;
-				bullets[i]->velocityY *= 3.0f / r2;
+				float r2 = sqrt(bullets[i]->velocityX * bullets[i]->velocityX + bullets[i]->velocityY * bullets[i]->velocityY) / scale;
+				bullets[i]->velocityX *= 3.0f / r2 ;
+				bullets[i]->velocityY *= 3.0f / r2 ;
 			}
 			if (distance(bullets[i]->posX, bullets[i]->posY, blackHoleX, blackHoleY) <= 10.0f)
 			{
-				bullets[i]->size -= blackHolePullingRate; //make the effect that the bullet is sucked into the black hole, and get smaller by time
+				bullets[i]->size -= blackHolePullingRate * scale; //make the effect that the bullet is sucked into the black hole, and get smaller by time
 				if (bullets[i]->size <= 0)
 				{
 					delete bullets[i];
 					bullets.erase(bullets.begin() + i);
+					std::cout << "true" << std::endl;
+
 					break;
 				}
 			}
@@ -1118,24 +1157,24 @@ void blackHolePulling(float dt)
 		//change the movement of the asteroid 
 		for (int i = 0; i < asteroids.size(); i++)
 		{
-			if (distance(asteroids[i]->posX, asteroids[i]->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS)
+			if (distance(asteroids[i]->posX, asteroids[i]->posY, blackHoleX, blackHoleY) <= radius)
 			{
 				float forceX = blackHoleX - asteroids[i]->posX;
 				float forceY = blackHoleY - asteroids[i]->posY;
-				float r = sqrt(forceX * forceX + forceY * forceY);
+				float r = sqrt(forceX * forceX + forceY * forceY) / scale;
 				//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
 				float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
 				forceX *= fg / r;
 				forceY *= fg / r;
 				asteroids[i]->velocityX += forceX;
 				asteroids[i]->velocityY += forceY;
-				float r2 = sqrt(asteroids[i]->velocityX * asteroids[i]->velocityX + asteroids[i]->velocityY * asteroids[i]->velocityY);
+				float r2 = sqrt(asteroids[i]->velocityX * asteroids[i]->velocityX + asteroids[i]->velocityY * asteroids[i]->velocityY) / scale;
 				asteroids[i]->velocityX *= 3.0f / r2;
 				asteroids[i]->velocityY *= 3.0f / r2;
 			}
 			if (distance(asteroids[i]->posX, asteroids[i]->posY, blackHoleX, blackHoleY) <= 10.0f)
 			{
-				asteroids[i]->radius -= blackHolePullingRate; //make the effect that the asteroid is sucked into the black hole, and get smaller by time
+				asteroids[i]->radius -= blackHolePullingRate * scale; //make the effect that the asteroid is sucked into the black hole, and get smaller by time
 				if (asteroids[i]->radius <= 0)
 				{
 					delete asteroids[i];
@@ -1147,24 +1186,24 @@ void blackHolePulling(float dt)
 		//change the movement of the particles
 		for (int i = 0; i < particles.size(); i++)
 		{
-			if (distance(particles[i]->posX, particles[i]->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS)
+			if (distance(particles[i]->posX, particles[i]->posY, blackHoleX, blackHoleY) <= radius)
 			{
 				float forceX = blackHoleX - particles[i]->posX;
 				float forceY = blackHoleY - particles[i]->posY;
-				float r = sqrt(forceX * forceX + forceY * forceY);
+				float r = sqrt(forceX * forceX + forceY * forceY) / scale;
 				//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
 				float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
 				forceX *= fg / r;
 				forceY *= fg / r;
 				particles[i]->velocityX += forceX;
 				particles[i]->velocityY += forceY;
-				float r2 = sqrt(particles[i]->velocityX * particles[i]->velocityX + particles[i]->velocityY * particles[i]->velocityY);
+				float r2 = sqrt(particles[i]->velocityX * particles[i]->velocityX + particles[i]->velocityY * particles[i]->velocityY) / scale;
 				particles[i]->velocityX *= 3.0f / r2;
 				particles[i]->velocityY *= 3.0f / r2;
 			}
 			if (distance(particles[i]->posX, particles[i]->posY, blackHoleX, blackHoleY) <= 10.0f)
 			{
-				particles[i]->radius -= blackHolePullingRate;//make the effect that the particle is sucked into the black hole, and get smaller by time
+				particles[i]->radius -= blackHolePullingRate * scale;//make the effect that the particle is sucked into the black hole, and get smaller by time
 				if (particles[i]->radius <= 0)
 				{
 					delete particles[i];
@@ -1176,24 +1215,24 @@ void blackHolePulling(float dt)
 		//change the movement of the player
 		if (!invulnerable_state)
 		{
-			if (distance(player->posX, player->posY, blackHoleX, blackHoleY) <= BLACK_HOLE_RADIUS)
+			if (distance(player->posX, player->posY, blackHoleX, blackHoleY) <= radius)
 			{
 				float forceX = blackHoleX - player->posX;
 				float forceY = blackHoleY - player->posY;
-				float r = sqrt(forceX * forceX + forceY * forceY);
+				float r = sqrt(forceX * forceX + forceY * forceY)/ scale;
 				//base on Rs = 2 * G * M / c^2 with c is speed of light, M is mass, G  is gracitational constant
 				float fg = (2.0f * 0.6f * BL_MASS) / (r * r);
 				forceX *= fg / r;
 				forceY *= fg / r;
 				player->velocityX += forceX;
 				player->velocityY += forceY;
-				float r2 = sqrt(player->velocityX * player->velocityX + player->velocityY * player->velocityY);
+				float r2 = sqrt(player->velocityX * player->velocityX + player->velocityY * player->velocityY) / scale;
 				player->velocityX *= 3.0f / r2;
 				player->velocityY *= 3.0f / r2;
 			}
 			if (distance(player->posX, player->posY, blackHoleX, blackHoleY) <= 10.0f)
 			{
-				player->playerSize -= blackHolePullingRate;//make the effect that the player is sucked into the black hole, and get smaller by time
+				player->playerSize -= blackHolePullingRate * scale;//make the effect that the player is sucked into the black hole, and get smaller by time
 				if (player->playerSize <= 0)
 				{
 					player->die();
@@ -1212,7 +1251,7 @@ void blackHolePulling(float dt)
 		if (blackHoleActivated)
 		{
 			blackHoleActivated = false;
-			player->playerSize = PLAYER_SIZE;
+			player->playerSize = PLAYER_SIZE * scale;
 			//just to make sure player wont shrink after surviving the pulling of the black hole
 		}
 		else
@@ -1257,6 +1296,39 @@ void idle()
 //app init function
 void init(float initScreenWidth, float initScreenHeight)
 {
+	//this is used to set the ratio to scale the object according to the size of the arena
+	if (ARENA_FIT_SCREEN)
+	{
+		arenaWidth = screenWidth;
+		arenaHeight = screenHeight;
+		ratioX = 1.0f;
+		ratioY = 1.0f;
+	}
+	else
+	{
+		ratioX = arenaWidth / screenWidth;
+		ratioY = arenaHeight / screenHeight;
+	}
+
+	if (ratioX > ratioY)
+	{
+		wallWidth = screenWidth;
+		wallHeight = screenWidth * arenaHeight / arenaWidth;
+		scale = 1 / ratioX;
+	}
+	else if (ratioX < ratioY)
+	{
+		wallWidth = screenHeight * arenaWidth / arenaHeight;
+		wallHeight = screenHeight;
+		scale = 1 / ratioY;
+	}
+	else
+	{
+		wallWidth = screenWidth;
+		wallHeight = screenHeight;
+		scale = 1 / ratioY;
+	}
+
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(0, initScreenWidth, 0, initScreenHeight, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
@@ -1272,40 +1344,23 @@ int main(int argc, char** argv)
 
 	glutCreateWindow("Assignment 1");
 
-	//base on the mode, the arena can fit the screen or can be adjusted manually
-	if (ARENA_FIT_SCREEN)
+	init(screenWidth, screenHeight);
+	if (SPAWNING_IN_MIDDLE)
 	{
-		arenaWidth = screenWidth;
-		arenaHeight = screenHeight;
+		player = new Player(screenWidth / 2, screenHeight / 2, PLAYER_SIZE * scale);
 	}
 	else
 	{
-		if (arenaWidth > screenWidth)
-		{
-			arenaWidth = screenWidth;
-		}
-		if (arenaHeight > screenHeight)
-		{
-			arenaHeight = screenHeight;
-		}
+		player = new Player((screenWidth - wallWidth) / 2 + SPAWNING_POS, (screenHeight - wallHeight) / 2 + SPAWNING_POS, PLAYER_SIZE * scale);
 	}
-	init(screenWidth, screenHeight);
+
 	glutFullScreen();
 	srand(time(NULL));
 
 	//random black hole positions
-	blackHoleX = (rand() % (int)(arenaWidth - 2 * BLACK_HOLE_RADIUS)) + (screenWidth - arenaWidth) / 2 + BLACK_HOLE_RADIUS;
-	blackHoleY = (rand() % (int)(arenaHeight - 2 * BLACK_HOLE_RADIUS)) + (screenHeight - arenaHeight) / 2 + BLACK_HOLE_RADIUS;
-
-	//base on the mode that player can be spawn in the middle or can be adjusted manually
-	if (SPAWNING_IN_MIDDLE)
-	{
-		player = new Player(screenWidth / 2, screenHeight / 2);
-	}
-	else
-	{
-		player = new Player((screenWidth - arenaWidth)/2 + SPAWNING_POS, (screenHeight - arenaHeight) / 2 + SPAWNING_POS);
-	}
+	
+	blackHoleX = (rand() % (int)(wallWidth - 2 * BLACK_HOLE_RADIUS * scale)) + (screenWidth - wallWidth) / 2 + BLACK_HOLE_RADIUS * scale;
+	blackHoleY = (rand() % (int)(wallHeight - 2 * BLACK_HOLE_RADIUS * scale)) + (screenHeight - wallHeight) / 2 + BLACK_HOLE_RADIUS * scale;
 
 	//add mouse function
 	glutMouseFunc(on_mouse_button);
@@ -1313,7 +1368,7 @@ int main(int argc, char** argv)
 	//add key function 
 	glutKeyboardFunc(on_key_press);
 	glutKeyboardUpFunc(on_key_release);
-
+			
 	//add idle function
 	glutIdleFunc(idle);
 

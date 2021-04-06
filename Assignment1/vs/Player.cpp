@@ -1,10 +1,13 @@
 #include "Player.h"
-Player::Player(float posX, float posY)
+Player::Player(float posX, float posY, float initPlayerSize)
 {
 	this->posX = posX;
 	this->posY = posY;
 	this->spawningX = posX;
 	this->spawningY = posY;
+	this->initPlayerSize = initPlayerSize;
+	this->playerSize = initPlayerSize;
+	thrustSpeed = initPlayerSize / 2;
 }
 
 Player::~Player()
@@ -24,8 +27,8 @@ void Player::die()
 	posY= spawningY;
 	velocityX = 0.0;
 	velocityY = 0.0;
-	playerDirectionRadian = 0.0f;
-	playerSize = PLAYER_SIZE;
+	playerDirectionRadian = 0.0f;	
+	playerSize = initPlayerSize;
 	life--;
 }
 
@@ -43,7 +46,7 @@ void Player::respawn()
 	velocityX = 0.0;
 	velocityY = 0.0;
 	playerDirectionRadian = 0.0f;
-	playerSize = PLAYER_SIZE;
+	playerSize = initPlayerSize;
 	asteroidsDestroyed = 0;
 	score = 0;
 }

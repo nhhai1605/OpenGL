@@ -1,4 +1,5 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(519,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (i3d.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   main.cpp
-C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(1294,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(1003,49): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\vs\main.cpp(1358,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   i3d.vcxproj -> C:\Users\nguyenhh\Desktop\3dani\opengl\Assignment1\Assignment164dbg.exe

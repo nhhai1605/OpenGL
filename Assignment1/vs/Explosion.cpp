@@ -1,6 +1,6 @@
 #include "Explosion.h"
 
-Explosion::Explosion(float posX, float posY, float radius, float color[3], int particleNum, float particleSize)
+Explosion::Explosion(float posX, float posY, float radius, float color[3], int particleNum, float particleSize, float scale)
 {
 	this->posX = posX;
 	this->posY = posY;
@@ -12,8 +12,8 @@ Explosion::Explosion(float posX, float posY, float radius, float color[3], int p
 	{
 		float radian = (angle + rand() % 20 - 10) * PI / 180;
 		Particle* particle = new Particle(posX, posY, radius, radian * i, colorArr, particleSize);
-		particle->velocityX = EXPLOSION_SPEED / 60 * -sin(particle->particleDirectionRadian);
-		particle->velocityY = EXPLOSION_SPEED / 60 * cos(particle->particleDirectionRadian);
+		particle->velocityX = scale * EXPLOSION_SPEED / 60 * -sin(particle->particleDirectionRadian);
+		particle->velocityY = scale * EXPLOSION_SPEED / 60 * cos(particle->particleDirectionRadian);
 		particles.push_back(particle);
 	}
 	sizeReduceRate = particleSize / EXPLOSION_DECAY_TIME;
