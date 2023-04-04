@@ -1,0 +1,27 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(519,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Assignment1.vcxproj, i3d.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Asteroid.h(52,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Asteroid.h(53,46): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Particle.h(18,77): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Particle.h(18,59): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Particle.h(18,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Camera.h(90,18): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Camera.h(97,23): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Camera.h(104,23): warning C4805: '==': unsafe mix of type 'boolean' and type 'bool' in operation
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(348,48): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(349,48): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(374,37): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(391,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(404,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(418,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(431,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(466,33): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(483,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(496,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(510,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(523,36): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(1237,151): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(1238,151): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\main.cpp(1341,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\vs\Utility.h(120): warning C4172: returning address of local variable or temporary: result
+  i3d.vcxproj -> C:\Users\nguyenhh\Desktop\Uni\3dani\opengl\a2-S3822918\Assignment264dbg.exe
