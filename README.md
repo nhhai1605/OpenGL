@@ -14,5 +14,7 @@ https://user-images.githubusercontent.com/68266079/229742922-c4d8472d-3380-40d9-
 * Same features in 2D but without blackholes.
 * Have changing camera options.
 
-Uploading Assignment 2 2023-04-04 18-56-01.mp4…
+https://user-images.githubusercontent.com/68266079/229743708-99a53c9a-07cd-4583-a026-38fe98270204.mp4
+
+
 
